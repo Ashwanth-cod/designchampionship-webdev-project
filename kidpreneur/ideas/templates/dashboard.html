@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Dashboard | NeoHive{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+  <!-- Greeting Card -->
+  <div class="p-4 mb-5 rounded-4 shadow text-center" style="background: linear-gradient(135deg, #f6d365, #fda085);">
+    <h2 class="fw-bold">🎉 Welcome, {{ user.username }}!</h2>
+    <p class="lead">Here's your creative playground. 🚀 Keep thinking, creating, and launching your ideas!</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card shadow rounded-4 p-4 text-center" style="background: #ffe5b4;">
+        <h4>💡 Your Ideas</h4>
+        <h2 class="fw-bold">{{ ideas.count }}</h2>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow rounded-4 p-4 text-center" style="background: #b4ffe5;">
+        <h4>👍 Total Likes</h4>
+        <h2 class="fw-bold">{{ total_likes }}</h2>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow rounded-4 p-4 text-center" style="background: #dcb4ff;">
+        <h4>💬 Comments Received</h4>
+        <h2 class="fw-bold">{{ total_comments }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Idea Cards -->
+  <h3 class="mb-3">Your Ideas</h3>
+  <div class="row g-4">
+    {% for idea in ideas %}
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm rounded-4" style="border: 3px solid #fda085;">
+        {% if idea.logo %}
+        <img src="{{ idea.logo.url }}" class="card-img-top rounded-top-4" style="height:180px; object-fit:cover;">
+        {% else %}
+        <img src="{% static 'images/placeholder-idea.png' %}" class="card-img-top rounded-top-4" style="height:180px; object-fit:cover;">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ idea.name }}</h5>
+          <p class="card-text">{{ idea.description|truncatewords:20 }}</p>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+          <span class="badge bg-primary">{{ idea.category|title }}</span>
+          <a href="{% url 'idea_detail' idea.slug %}" class="btn btn-sm btn-warning">View</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-muted">You haven't added any ideas yet! 🌱</p>
+    {% endfor %}
+  </div>
+
+  <!-- Fun Call-to-Action -->
+  <div class="mt-5 p-4 text-center rounded-4 shadow" style="background: linear-gradient(135deg, #6a11cb, #2575fc); color:white;">
+    <h3>🚀 Ready to launch a new idea?</h3>
+    <a href="{% url 'idea_create' %}" class="btn btn-light btn-lg mt-3">Create New Idea</a>
+  </div>
+
+</div>
+
+<style>
+  .card:hover {
+    transform: translateY(-5px);
+    transition: 0.3s ease;
+  }
+</style>
+{% endblock %}

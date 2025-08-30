@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}NeoHive Kids{% endblock %}
+
+{% block content %}
+<div class="text-center my-5 py-5" style="background: linear-gradient(135deg, #ffcb05, #ff6b6b); border-radius: 20px; color: #1e1f28;">
+    <img src="{% static 'images/rocket.png' %}" alt="Rocket" style="width:80px; margin-bottom:20px;">
+    <h1 class="display-4 fw-bold">Think. Create. Launch!</h1>
+    <p class="lead mt-3">A playful space for kids to share their amazing startup ideas, learn, and grow together.</p>
+    <a href="{% url 'signup' %}" class="btn btn-dark btn-lg mt-4">🚀 Get Started</a>
+</div>
+{% endblock %}

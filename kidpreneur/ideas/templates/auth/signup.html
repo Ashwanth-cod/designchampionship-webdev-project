@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height:70vh;">
+  <div class="card shadow-lg p-4" style="max-width:600px; width:100%; border-radius:1rem; background:rgba(255,255,255,0.9);">
+    <h2 class="text-center mb-4">🎉 Create Your Account</h2>
+    <form method="POST">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="row g-3">
+        {% for field in form %}
+          <div class="col-md-6">
+            {{ field|add_class:"form-control" }}    
+            {% if field.errors %}
+              <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn-fun w-100 mt-4">🚀 Sign Up</button>
+    </form>
+
+    <p class="text-center mt-3">
+      Already have an account? <a href="{% url 'login' %}">🔑 Login</a>
+    </p>
+  </div>
+</div>
+
+<style>
+  input::placeholder {
+    color: #999;
+    font-style: italic;
+  }
+</style>
+{% endblock %}
