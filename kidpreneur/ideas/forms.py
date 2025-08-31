@@ -1,42 +1,93 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from .models import Idea
+from .models import CustomUser, Idea, Subscriber
+
+# -------------------------
+# Signup Form
+# -------------------------
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from .models import CustomUser
 
 
-# --- User Signup Form ---
+
+
 class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(
-        required=True,
-        widget=forms.EmailInput(attrs={"placeholder": "Email address"})
+    dob = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}), required=True
+    )
+    is_student = forms.BooleanField(required=False)
+    school_name = forms.CharField(required=False)
+    phone_number = forms.CharField(required=True)
+
+    class Meta(UserCreationForm.Meta):
+        model = CustomUser
+        fields = [
+            "first_name",
+            "last_name",
+            "dob",
+            "is_student",
+            "school_name",
+            "phone_number",
+            "email",
+            "username",
+            "password1",
+            "password2",
+        ]
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'first_name', 'last_name']
+
+# -------------------------
+# Idea Form
+# -------------------------
+class IdeaForm(forms.ModelForm):
+    CATEGORY_CHOICES = [
+        ('tech', 'Technology'),
+        ('art', 'Art'),
+        ('education', 'Education'),
+        ('science', 'Science'),
+        ('business', 'Business'),
+        ('other', 'Other'),
+    ]
+
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter your idea title',
+            'class': 'form-control'
+        })
+    )
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'placeholder': 'Describe your idea...',
+            'class': 'form-control',
+            'rows': 5
+        })
+    )
+    category = forms.ChoiceField(
+        choices=CATEGORY_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
     )
 
     class Meta:
-        model = User
-        fields = ["username", "email", "password1", "password2"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add bootstrap classes + placeholders
-        for field_name, field in self.fields.items():
-            field.widget.attrs["class"] = "form-control"
-            if not field.widget.attrs.get("placeholder"):
-                field.widget.attrs["placeholder"] = field.label
-
-
-# --- Idea Submission Form ---
-class IdeaForm(forms.ModelForm):
-    class Meta:
         model = Idea
-        fields = ["name", "logo", "description", "category"]
+        fields = ['title', 'description', 'category']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Bootstrap + placeholders
-        for field_name, field in self.fields.items():
-            field.widget.attrs["class"] = "form-control"
+# -------------------------
+# Newsletter Form
+# -------------------------
+class SubscriberForm(forms.ModelForm):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'Enter your email',
+            'class': 'form-control'
+        })
+    )
 
-            if field_name == "logo":
-                field.widget.attrs["class"] = "form-control-file"
-            else:
-                field.widget.attrs["placeholder"] = field.label
+    class Meta:
+        model = Subscriber
+        fields = ['email']

@@ -7,27 +7,37 @@
 {% block content %}
 <div class="d-flex justify-content-center align-items-center" style="min-height:70vh;">
   <div class="card shadow-lg p-4" style="max-width:500px; width:100%; border-radius:1rem; background:rgba(255,255,255,0.95);">
-    <h2 class="text-center mb-4">🔑 Login to Your Account</h2>
-    <form method="POST">
+    <h2 class="text-center mb-4">Login to Your Account</h2>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-sm">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" novalidate>
       {% csrf_token %}
       {{ form.non_field_errors }}
 
-      <div class="row g-3">
-        {% for field in form %}
-          <div class="col-12">
-            {{ field|add_class:"form-control" }}
-            {% if field.errors %}
-              <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
-            {% endif %}
-          </div>
+      <div class="mb-3">
+        {{ form.username|add_class:"form-control" }}
+        {% for error in form.username.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
         {% endfor %}
       </div>
 
-      <button type="submit" class="btn-fun w-100 mt-4">🚪 Login</button>
+      <div class="mb-3">
+        {{ form.password|add_class:"form-control" }}
+        {% for error in form.password.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn-fun w-100 mt-3">Login</button>
     </form>
 
     <p class="text-center mt-3">
-      Don’t have an account? <a href="{% url 'signup' %}">🎉 Sign Up</a>
+      Don’t have an account? <a href="{% url 'signup' %}">Sign Up</a>
     </p>
   </div>
 </div>
@@ -37,19 +47,30 @@
     color: #999;
     font-style: italic;
   }
+
   .btn-fun {
     background: linear-gradient(135deg, #ff9a9e, #fad0c4);
     border: none;
     color: white;
     font-weight: bold;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 12px;
     transition: 0.3s ease-in-out;
   }
+
   .btn-fun:hover {
     background: linear-gradient(135deg, #fad0c4, #ff9a9e);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .text-danger {
+    font-size: 0.85rem;
+  }
+
+  .form-control {
+    border-radius: 12px;
+    padding: 10px;
   }
 </style>
 {% endblock %}

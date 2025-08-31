@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-8jgwhlwrb^fgh$yh@jsd798szmayzz#-4z7g#x2a3d(7rb%0y$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.29.20"]
 
 
 # Application definition
@@ -72,17 +72,19 @@ WSGI_APPLICATION = 'kidpreneur.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'kidpreneur',     
-        'USER': 'root',              
-        'PASSWORD': '',              
-        'HOST': 'localhost',         
-        'PORT': '3306',              
+        'NAME': 'kidpreneur',
+        'USER': 'root',           # XAMPP default
+        'PASSWORD': '',           # XAMPP default
+        'HOST': 'localhost',
+        'PORT': '3306',
         'OPTIONS': {
+            'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
     }
 }
 
+AUTH_USER_MODEL = 'ideas.CustomUser'
 
 
 # Password validation
@@ -108,8 +110,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Asia/Kolkata'
+
 USE_TZ = True
 USE_L10N = True
 

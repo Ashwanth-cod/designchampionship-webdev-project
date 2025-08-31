@@ -1,147 +1,107 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}All Ideas{% endblock %}
+{% block title %}Search{% endblock %}
 
 {% block content %}
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        background: #f5f5f5;
-    }
+<div class="container mt-4">
 
-    .page-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        padding: 20px;
-    }
+    <!-- Search Bar -->
+    <input type="text" id="search-input" class="form-control mb-3" placeholder="Search Ideas, Users, Categories...">
 
-    .form-card, .ideas-container {
-        width: 100%;
-        max-width: 1200px;
-        margin-bottom: 30px;
-    }
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" id="search-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-tab="ideas" href="#">Ideas</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-tab="users" href="#">Users</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-tab="categories" href="#">Categories</a>
+        </li>
+    </ul>
 
-    .form-card {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .ideas-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        justify-content: center;
-    }
-
-    .idea-card {
-        background: white;
-        border-radius: 10px;
-        width: 300px;
-        min-height: 350px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 15px;
-        transition: transform 0.2s;
-    }
-
-    .idea-card:hover { transform: translateY(-5px); }
-
-    .idea-logo {
-        width: 100%;
-        height: 150px;
-        object-fit: contain;
-        border-radius: 10px;
-        margin-bottom: 10px;
-        background: #eee;
-    }
-
-    .idea-title {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    .idea-category {
-        font-size: 0.9rem;
-        color: #666;
-        margin-bottom: 10px;
-    }
-
-    .idea-description {
-        font-size: 0.95rem;
-        flex-grow: 1;
-        margin-bottom: 10px;
-    }
-
-    .idea-stats {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.85rem;
-        color: #333;
-    }
-
-    @media (max-width: 768px) {
-        .idea-card { width: 90%; }
-        .form-card { width: 90%; }
-    }
-</style>
-
-<div class="page-container">
-
-    <!-- Idea creation form -->
-    {% if user.is_authenticated %}
-    <div class="form-card">
-        <h3>Create a New Idea</h3>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="mb-3">
-                    {{ field.label_tag }}
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger">{{ field.errors|striptags }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-            <button class="btn btn-primary" type="submit">Submit Idea</button>
-        </form>
-    </div>
-    {% endif %}
-
-    <!-- Ideas list -->
-    <div class="ideas-container">
-        {% for idea in ideas %}
-            <div class="idea-card">
-                {% if idea.logo %}
-                    <img src="{{ idea.logo.url }}" class="idea-logo" alt="{{ idea.name }}">
-                {% else %}
-                    <div class="idea-logo"></div>
-                {% endif %}
-
-                <div class="idea-title">{{ idea.name }}</div>
-                <div class="idea-category">{{ idea.get_category_display }}</div>
-                <div class="idea-description">{{ idea.description|truncatechars:120 }}</div>
-
-                <div class="idea-stats">
-                    <span>👍 {{ idea.likes.count }}</span>
-                    <span>⭐ {{ idea.ratings.count }}</span>
-                </div>
-
-                <a href="{% url 'idea_detail' idea.slug %}" class="btn btn-primary mt-2">View</a>
-            </div>
-        {% empty %}
-            <p>No ideas yet. Be the first to add one!</p>
-        {% endfor %}
-    </div>
+    <!-- Results -->
+    <div id="search-results"></div>
 
 </div>
-{% endblock content %}
+
+<script>
+let activeTab = 'ideas';
+const input = document.getElementById('search-input');
+const resultsDiv = document.getElementById('search-results');
+const tabs = document.querySelectorAll('#search-tabs .nav-link');
+
+// Switch tabs
+tabs.forEach(tab => {
+    tab.addEventListener('click', function(e){
+        e.preventDefault();
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        activeTab = this.dataset.tab;
+        fetchResults(input.value);
+    });
+});
+
+// Fetch results dynamically
+function fetchResults(query){
+    fetch(`{% url 'search' %}?q=${query}&tab=${activeTab}`)
+    .then(res => res.json())
+    .then(data => {
+        let html = '';
+        if(activeTab === 'ideas'){
+            if(data.ideas.length){
+                html += '<div class="row">';
+                data.ideas.forEach(idea => {
+                    html += `<div class="col-md-4 mb-3">
+                                <div class="card h-100 shadow-sm">
+                                ${idea.logo ? `<img src="${idea.logo}" class="card-img-top" style="height:180px; object-fit:cover;">` : ''}
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">${idea.name}</h5>
+                                        <p class="card-subtitle text-muted">${idea.category}</p>
+                                        <p class="card-text mt-2">${idea.description}</p>
+                                        <div class="mt-auto d-flex justify-content-between align-items-center">
+                                            <span>👍 ${idea.likes}</span>
+                                            <a href="/idea/${idea.slug}/" class="btn btn-sm btn-primary">View</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                });
+                html += '</div>';
+            } else {
+                html = '<p>No ideas found.</p>';
+            }
+        } else if(activeTab === 'users'){
+            if(data.users.length){
+                html += '<ul class="list-group">';
+                data.users.forEach(user => {
+                    html += `<li class="list-group-item"><strong>${user.username}</strong> - ${user.first_name} ${user.last_name}</li>`;
+                });
+                html += '</ul>';
+            } else {
+                html = '<p>No users found.</p>';
+            }
+        } else if(activeTab === 'categories'){
+            if(data.categories.length){
+                html += '<ul class="list-group">';
+                data.categories.forEach(cat => {
+                    html += `<li class="list-group-item">${cat}</li>`;
+                });
+                html += '</ul>';
+            } else {
+                html = '<p>No categories found.</p>';
+            }
+        }
+        resultsDiv.innerHTML = html;
+    });
+}
+
+// Trigger search while typing
+input.addEventListener('input', () => {
+    fetchResults(input.value);
+});
+
+// Load initial results
+fetchResults('');
+</script>
+{% endblock %}

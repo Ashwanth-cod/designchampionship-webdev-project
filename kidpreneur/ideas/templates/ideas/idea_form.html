@@ -1,139 +1,78 @@
-{% extends 'base.html' %}
-{% load static %}
-{% load humanize %}
-
-{% block title %}{{ idea.name }}{% endblock %}
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Update Idea{% else %}Create Idea{% endif %}{% endblock %}
 
 {% block content %}
-<style>
-body {
-    background: url("{% static 'images/doodle-bg.png' %}") repeat;
-    min-height: 80vh;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-}
+<div class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
+  <div class="card shadow-lg p-4" style="max-width:700px; width:100%; border-radius:1rem; background:#fff;">
+    <h2 class="text-center mb-4">
+      {% if form.instance.pk %}
+        ✏️ Update Idea
+      {% else %}
+        💡 Create New Idea
+      {% endif %}
+    </h2>
 
-.detail-container {
-    background: rgba(255,255,255,0.95);
-    border-radius: 1.5rem;
-    padding: 30px 40px;
-    max-width: 800px;
-    width: 100%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
 
-.idea-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 20px;
-}
+    <form method="POST">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
 
-.idea-header img {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-    border-radius: 1rem;
-    background: #f0f0f0;
-    padding: 5px;
-}
-
-.idea-title {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #ff6f61;
-}
-
-.idea-meta {
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 15px;
-}
-
-.idea-description {
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 20px;
-}
-
-.stats {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.stats span {
-    font-weight: bold;
-    color: #333;
-}
-
-.comments-section {
-    margin-top: 30px;
-}
-
-.comments-section h4 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-}
-
-.comment {
-    background: #f5f5f5;
-    border-radius: 0.8rem;
-    padding: 10px 15px;
-    margin-bottom: 10px;
-}
-
-.comment strong {
-    color: #ff6f61;
-}
-
-.comment-time {
-    font-size: 0.8rem;
-    color: #777;
-}
-
-@media(max-width:768px){
-    .idea-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    .idea-header img { margin-bottom: 10px; }
-}
-</style>
-
-<div class="detail-container">
-    <div class="idea-header">
-        {% if idea.logo %}
-            <img src="{{ idea.logo.url }}" alt="{{ idea.name }}">
-        {% endif %}
-        <div>
-            <div class="idea-title">{{ idea.name }}</div>
-            <div class="idea-meta">
-                Category: {{ idea.get_category_display }} | 
-                Posted {{ idea.created_at|naturaltime }} by {{ idea.created_by.username }}
-            </div>
-        </div>
-    </div>
-
-    <div class="idea-description">{{ idea.description }}</div>
-
-    <div class="stats">
-        <span>👍 Likes: {{ idea.likes.count }}</span>
-        <span>⭐ Ratings: {{ idea.ratings.count }}</span>
-    </div>
-
-    <div class="comments-section">
-        <h4>Comments ({{ idea.comments.count }})</h4>
-        {% for comment in idea.comments.all %}
-            <div class="comment">
-                <strong>{{ comment.user.username }}</strong>: {{ comment.text }}
-                <div class="comment-time">{{ comment.created_at|naturaltime }}</div>
-            </div>
-        {% empty %}
-            <p>No comments yet. Be the first to comment! 💬</p>
+      <!-- Title -->
+      <div class="mb-3">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+        {% for error in form.title.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
         {% endfor %}
-    </div>
+      </div>
+
+      <!-- Description -->
+      <div class="mb-3">
+        {{ form.description.label_tag }}
+        {{ form.description }}
+        {% for error in form.description.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Category -->
+      <div class="mb-3">
+        {{ form.category.label_tag }}
+        {{ form.category }}
+        {% for error in form.category.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">⬅ Back</a>
+        <button type="submit" class="btn-fun">
+          {% if form.instance.pk %} Update Idea {% else %} Create Idea {% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
-{% endblock content %}
+
+<style>
+  .btn-fun {
+    background: linear-gradient(135deg, #003566, #00509e);
+    border: none;
+    color: #ffe066;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: 0.3s ease-in-out;
+  }
+  .btn-fun:hover {
+    background: linear-gradient(135deg, #00509e, #003566);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+</style>
+{% endblock %}
