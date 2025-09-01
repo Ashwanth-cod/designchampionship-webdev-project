@@ -89,7 +89,7 @@
     </div>
     <div class="card-custom author">
       <p>
-        By <strong>{{ idea.created_by.username }}</strong>  
+        By <strong><a href="{% url 'user-profile' idea.created_by.username %}" style="text-decoration:none;">{{ idea.created_by.username }}</a></strong>
         <br>
         <small>{{ idea.created_at|date:"M d, Y" }}</small>
       </p>
@@ -125,8 +125,8 @@
         <button type="submit" class="btn btn-success">Submit</button>
       </form>
       {% for comment in comments %}
-        <div class="comment-item">
-          <strong>{{ comment.user.username }}</strong>
+        <div class="comment-item">   
+       <strong><a href="{% url 'user-profile' comment.user.username %}" style="text-decoration:none;">{{ comment.user.username }}</a></strong>
           <small class="text-muted"> • {{ comment.created_at|naturaltime }}</small>
           <p class="mb-0">{{ comment.text }}</p>
         </div>

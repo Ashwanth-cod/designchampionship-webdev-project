@@ -31,14 +31,14 @@
   .nav-tabs .nav-link {
     font-weight: 600;
     border-radius: 10px 10px 0 0;
-    background: #ffe066; /* Yellow */
+    background: #003566; /* Dark Blue */
     color: #003566;      /* Dark Blue */
     margin-right: 5px;
   }
 
   .nav-tabs .nav-link.active {
-    background: #003566; /* Dark Blue */
-    color: #ffe066;      /* Yellow */
+    color: #000000ff;      /* Yellow */
+    background: #000000ff;
   }
 
   .btn-fun {
@@ -107,8 +107,8 @@
               </div>
               <!-- Actions -->
               <div>
-                <a href="{% url 'idea_detail' idea.slug %}" class="btn btn-outline-primary btn-sm">View</a>
-                <a href="{% url 'idea_update' idea.slug %}" class="btn btn-outline-warning btn-sm">Edit</a>
+                <a href="{% url 'idea_detail' idea.slug %}" class="btn btn-outline-success btn-sm">View</a>
+                <a href="{% url 'idea_update' idea.slug %}" class="btn btn-outline-primary btn-sm">Edit</a>
                 <form method="POST" action="{% url 'idea_delete' idea.slug %}" style="display:inline;">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
@@ -124,7 +124,8 @@
       <!-- Create Idea -->
       <div class="tab-pane fade" id="create" role="tabpanel">
         <h3>➕ Create New Idea</h3>
-        <a href="{% url 'idea_create' %}" class="btn-fun w-100">🚀 Go to Create Idea Page</a>
+        <br>
+        <a href="{% url 'idea_create' %}" class="btn-fun w-100" style="text-decoration:none; margin-left: 20px">🚀 Go to Create Idea Page</a>
       </div>
     </div>
   </div>

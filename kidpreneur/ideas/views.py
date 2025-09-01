@@ -4,55 +4,51 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Q, Count
 from .models import Idea, Comment, Like, Subscriber, Report
+from django.db.models import Count, Sum
 from .forms import CustomUserCreationForm, IdeaForm, SubscriberForm, UserUpdateForm
-
 
 User = get_user_model()
 
+# --------------------------
+# Search
+# --------------------------
+@login_required
+def search_page(request):
+    return render(request, "search/index.html")
+
 
 @login_required
-def search_view(request):
-    query = request.GET.get('q', '')
-    tab = request.GET.get('tab', 'ideas')
-    cat_filter = request.GET.get('cat', None)
+def search_api(request):
+    q = request.GET.get("q", "").strip()
+    tab = request.GET.get("tab", "ideas")
 
-    context = {'query': query, 'tab': tab}
+    if tab == "ideas":
+        qs = Idea.objects.all()
+        if q:
+            qs = qs.filter(title__icontains=q)
+        qs = qs[:20]
+        data = list(qs.values("title", "slug", "category", "description", "likes"))
 
-    # ----------------------
-    # Ideas
-    # ----------------------
-    ideas = Idea.objects.all()
-    if query:
-        ideas = ideas.filter(
-            Q(title__icontains=query) |
-            Q(description__icontains=query) |
-            Q(category__icontains=query)
-        )
-    if cat_filter:
-        ideas = ideas.filter(category=cat_filter)
-    context['ideas'] = ideas
+    elif tab == "users":
+        qs = User.objects.all()
+        if q:
+            qs = qs.filter(username__icontains=q)
+        qs = qs[:20]
+        data = list(qs.values("username", "first_name", "last_name", "email"))
 
-    # ----------------------
-    # Users
-    # ----------------------
-    users = User.objects.all()
-    if query:
-        users = users.filter(
-            Q(username__icontains=query) |
-            Q(first_name__icontains=query) |
-            Q(last_name__icontains=query)
-        )
-    context['users'] = users
+    elif tab == "categories":
+        qs = Idea.objects.all()
+        if q:
+            qs = qs.filter(category__icontains=q)
+        qs = qs.values("category").annotate(count=Count("id")).order_by("-count")
+        data = list(qs)
 
-    # ----------------------
-    # Categories with counts
-    # ----------------------
-    categories = Idea.objects.values('category').annotate(count=Count('id'))
-    context['categories'] = categories  # [{'category': 'other', 'count': 2}, ...]
+    else:
+        data = []
 
-    return render(request, 'search/INDEX.html', context)
+    return JsonResponse(data, safe=False)
+
 
 # --------------------------
 # Basic Pages
@@ -76,7 +72,7 @@ def basetest_view(request):
 # --------------------------
 # Dashboard & Profile
 # --------------------------
-@login_required(login_url='login')
+@login_required(login_url="login")
 def dashboard_view(request):
     if request.method == "POST" and "profile_update" in request.POST:
         form = UserUpdateForm(request.POST, instance=request.user)
@@ -88,53 +84,74 @@ def dashboard_view(request):
         form = UserUpdateForm(instance=request.user)
 
     ideas = Idea.objects.filter(created_by=request.user)
-    return render(request, "dashboard.html", {
-        "ideas": ideas,
-        "user_form": form,
-    })
+    return render(
+        request,
+        "dashboard.html",
+        {"ideas": ideas, "user_form": form},
+    )
 
 
 @login_required
 def user_update(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = UserUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Profile updated successfully!')
-        return redirect('dashboard')
-    return redirect('dashboard')
+            messages.success(request, "Profile updated successfully!")
+        return redirect("dashboard")
+    return redirect("dashboard")
+
+
+@login_required
+def user_view(request, username):
+    user_obj = get_object_or_404(User, username=username)
+    ideas = getattr(user_obj, "ideas", None).all() if hasattr(user_obj, "ideas") else []
+
+    stats = {
+        "total_ideas": ideas.count(),
+        "total_likes": ideas.aggregate(total=Sum("likes"))["total"] or 0,
+        "unique_categories": ideas.values("category").distinct().count(),
+    }
+
+    return render(request, "profile.html", {
+        "user_obj": user_obj,
+        "ideas": ideas,
+        "stats": stats,
+    })
 
 
 # --------------------------
 # Auth Views
 # --------------------------
+
 def signup_view(request):
+    next_url = request.GET.get("next") or request.POST.get("next")  # capture ?next=...
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            if not user.is_student:  # if not student, clear school_name
+            if not user.is_student:
                 user.school_name = ""
             user.save()
-            login(request, user)  # auto-login
+            login(request, user)
             messages.success(request, f"Welcome, {user.username}! Your account has been created.")
-            return redirect("dashboard")
+            return redirect(next_url or "dashboard")  # use next if available
     else:
         form = CustomUserCreationForm()
-    return render(request, "auth/signup.html", {"form": form})
+    return render(request, "auth/signup.html", {"form": form, "next": next_url})
 
 
 def login_view(request):
+    next_url = request.GET.get("next") or request.POST.get("next")  # capture ?next=...
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect("dashboard")
+            return redirect(next_url or "dashboard")  # use next if available
     else:
         form = AuthenticationForm(request)
-    return render(request, "auth/login.html", {"form": form})
-
+    return render(request, "auth/login.html", {"form": form, "next": next_url})
 
 @login_required
 def logout_view(request):
@@ -143,84 +160,40 @@ def logout_view(request):
 
 
 # --------------------------
-# Search View
-# --------------------------
-@login_required
-def search_view(request):
-    query = request.GET.get('q', '')
-    tab = request.GET.get('tab', 'ideas')
-    category_filter = request.GET.get('cat', None)
-
-    context = {'query': query, 'tab': tab}
-
-    # Ideas search
-    if tab == 'ideas':
-        ideas = Idea.objects.all()
-        if query:
-            ideas = ideas.filter(
-                Q(title__icontains=query) |
-                Q(description__icontains=query) |
-                Q(category__icontains=query)
-            )
-        if category_filter:
-            ideas = ideas.filter(category=category_filter)
-        context['ideas'] = ideas
-
-    # Users search
-    elif tab == 'users':
-        users = User.objects.all()
-        if query:
-            users = users.filter(
-                Q(username__icontains=query) |
-                Q(first_name__icontains=query) |
-                Q(last_name__icontains=query)
-            )
-        context['users'] = users
-
-    # Categories search
-    elif tab == 'categories':
-        categories = Idea.objects.all()
-        if query:
-            categories = categories.filter(category__icontains=query)
-        categories = categories.values('category').annotate(count=Count('id')).order_by('category')
-        context['categories'] = categories
-
-    return render(request, 'search/INDEX.html', context)
-
-
-# --------------------------
-# Idea CRUD
+# Idea CRUD + AJAX Like Toggle
 # --------------------------
 @login_required
 def idea_detail(request, slug):
     idea = get_object_or_404(Idea, slug=slug)
     user_liked = Like.objects.filter(idea=idea, user=request.user).exists()
-    comments = idea.comments.all().order_by('-created_at')
-
-    if request.method == 'POST':
-        if 'like_toggle' in request.POST:
-            if user_liked:
-                Like.objects.filter(idea=idea, user=request.user).delete()
-            else:
-                Like.objects.create(idea=idea, user=request.user)
-            return redirect('idea_detail', slug=slug)
-
-        elif 'comment_text' in request.POST:
-            text = request.POST.get('comment_text', '').strip()
-            if text:
-                Comment.objects.create(idea=idea, user=request.user, text=text)
-            return redirect('idea_detail', slug=slug)
-
-        elif 'report_toggle' in request.POST:
-            Report.objects.get_or_create(idea=idea, user=request.user)
-            return redirect('idea_detail', slug=slug)
+    comments = idea.comments.all().order_by("-created_at")
 
     context = {
-        'idea': idea,
-        'user_liked': user_liked,
-        'comments': comments,
+        "idea": idea,
+        "user_liked": user_liked,
+        "comments": comments,
+        "like_count": Like.objects.filter(idea=idea).count(),
     }
-    return render(request, 'ideas/idea_detail.html', context)
+    return render(request, "ideas/idea_detail.html", context)
+
+
+@login_required
+def toggle_like(request, slug):
+    """AJAX endpoint for toggling like/unlike."""
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        idea = get_object_or_404(Idea, slug=slug)
+        like, created = Like.objects.get_or_create(idea=idea, user=request.user)
+        if not created:  # already liked -> unlike
+            like.delete()
+            liked = False
+        else:
+            liked = True
+
+        return JsonResponse({
+            "liked": liked,
+            "like_count": Like.objects.filter(idea=idea).count(),
+        })
+    return JsonResponse({"error": "Invalid request"}, status=400)
 
 
 @login_required
@@ -268,14 +241,14 @@ def idea_delete(request, slug):
 # Newsletter AJAX
 # --------------------------
 def subscribe_newsletter(request):
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
         form = SubscriberForm(request.POST)
         if form.is_valid():
-            subscriber, created = Subscriber.objects.get_or_create(email=form.cleaned_data['email'])
+            subscriber, created = Subscriber.objects.get_or_create(email=form.cleaned_data["email"])
             if created:
-                return JsonResponse({'status': 'success', 'message': 'Subscribed successfully!'})
+                return JsonResponse({"status": "success", "message": "Subscribed successfully!"})
             else:
-                return JsonResponse({'status': 'info', 'message': 'You are already subscribed.'})
+                return JsonResponse({"status": "info", "message": "You are already subscribed."})
         else:
-            return JsonResponse({'status': 'error', 'message': 'Invalid email address.'})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
+            return JsonResponse({"status": "error", "message": "Invalid email address."})
+    return JsonResponse({"status": "error", "message": "Invalid request."})

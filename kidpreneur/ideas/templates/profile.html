@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Profile · {{ user_obj.username }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --card:#ffffff; --border:#e5e7eb;
+    --text:#111827; --muted:#6b7280;
+    --accent-red:#f87171; --accent-yellow:#facc15; --accent-blue:#60a5fa;
+  }
+
+  body {
+    color: var(--text);
+  }
+
+  .profile-container{
+    max-width:1100px; margin:32px auto; padding:0 16px;
+    display:grid; grid-template-columns:280px 1fr; gap:24px;
+  }
+
+  /* Sidebar */
+  .sidebar{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:24px; text-align:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+  }
+  .avatar{
+    width:120px; height:120px; border-radius:50%;
+    background:var(--accent-blue); color:white;
+    display:flex; align-items:center; justify-content:center;
+    font-size:2rem; font-weight:700; margin:0 auto 16px;
+  }
+  .user-name{ font-size:1.4rem; font-weight:700; margin-bottom:4px; }
+  .username{ color:var(--muted); margin-bottom:12px; }
+  .bio{ font-size:0.95rem; color:var(--text); margin-bottom:12px; }
+  .stats{ display:grid; gap:8px; margin-top:16px; font-size:0.9rem; color:var(--muted); }
+  .stats div{ padding:8px; border-radius:8px; background:#f3f4f6; }
+
+  /* Main */
+  .main h2{ font-size:1.3rem; font-weight:600; margin-bottom:16px; }
+  .cards-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px;
+  }
+
+  .idea-card{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:16px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .idea-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 6px 12px rgba(0,0,0,0.1);
+  }
+  .idea-title{ font-weight:600; margin-bottom:8px; }
+  .chip{
+    display:inline-block; padding:4px 10px; border-radius:999px;
+    font-size:.8rem; font-weight:500;
+  }
+  .chip-red{ background:var(--accent-red); color:white; }
+  .chip-yellow{ background:var(--accent-yellow); color:#111; }
+  .chip-blue{ background:var(--accent-blue); color:white; }
+  .meta{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:8px; font-size:0.85rem; color:var(--muted);
+  }
+  .likes{ font-weight:600; color:var(--accent-red); }
+  .view-link{
+    display:inline-block; margin-top:8px;
+    font-size:0.9rem; font-weight:500;
+    color:var(--accent-blue); text-decoration:none;
+  }
+  .view-link:hover{ text-decoration:underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="avatar">
+      {{ user_obj.username|first|upper }}
+    </div>
+    <div class="user-name">{{ user_obj.get_full_name|default:user_obj.username }}</div>
+    <div class="username">@{{ user_obj.username }}</div>
+    <div class="bio">{{ user_obj.profile.bio|default:"No bio yet." }}</div>
+
+    <div class="stats">
+      <div>💡 Ideas: {{ stats.total_ideas }}</div>
+      <div>❤️ Likes: {{ stats.total_likes }}</div>
+      <div>🏷 Categories: {{ stats.unique_categories }}</div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <h2>Ideas</h2>
+    <div class="cards-grid">
+      {% for idea in ideas %}
+      <article class="idea-card">
+        <h3 class="idea-title">{{ idea.title }}</h3>
+        <p>{{ idea.description|truncatechars:120 }}</p>
+        <div class="meta">
+          {% if idea.category == "Red" %}
+            <span class="chip chip-red">{{ idea.category }}</span>
+          {% elif idea.category == "Yellow" %}
+            <span class="chip chip-yellow">{{ idea.category }}</span>
+          {% else %}
+            <span class="chip chip-blue">{{ idea.category }}</span>
+          {% endif %}
+          <span class="likes">❤️ {{ idea.likes }}</span>
+        </div>
+        <a href="{% url 'idea_detail' idea.slug %}" class="view-link">View</a>
+      </article>
+      {% empty %}
+      <p>No ideas yet.</p>
+      {% endfor %}
+    </div>
+  </main>
+
+</div>
+{% endblock %}

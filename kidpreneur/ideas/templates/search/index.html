@@ -1,112 +1,253 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}Search{% endblock %}
-
-{% block extra_css %}
-<style>
-/* Tabs: black background with visible text */
-.nav-tabs .nav-link {
-    border: 2px solid #000;        /* black border */
-    background-color: #000;        /* black background */
-    color: #fff !important;        /* white text visible on black */
-    border-bottom: none;
-    margin-right: -1px;
-    border-radius: 0.5rem 0.5rem 0 0;
-    transition: all 0.3s ease;
-}
-
-/* Active tab: gold text to highlight */
-.nav-tabs .nav-link.active {
-    background-color: #111;        /* slightly lighter black */
-    color: #ffd700 !important;     /* gold text */
-    border-bottom: 2px solid #111;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-/* Hover effect: lighter black */
-.nav-tabs .nav-link:hover {
-    background-color: #222;
-    color: #ffd700 !important;     /* gold text on hover */
-    transform: translateY(-2px);
-}
-
-/* Tab Content Panel */
-.tab-content {
-    border: 2px solid #000;
-    border-radius: 0 0 0.5rem 0.5rem;
-    padding: 1rem;
-    background-color: #fff;        /* white content area */
-    transition: all 0.3s ease;
-}
-</style>
-{% endblock %}
+{% load humanize %}
 
 {% block content %}
-<div class="container mt-4">
+<style>
+  .search-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
 
-    <!-- Search Bar -->
-    <form method="get" class="d-flex mb-3">
-        <input type="text" name="q" value="{{ query }}" class="form-control me-2" placeholder="Search Ideas, Users, Categories...">
-        <button class="btn btn-primary">Search</button>
-    </form>
+  /* Input */
+  .search-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    outline: none;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search-input:focus {
+    border-color: #000;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  }
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-0" style="font-weight:bold; font-size:1.1rem;">
-        <li class="nav-item">
-            <a class="nav-link {% if tab == 'ideas' %}active{% endif %}" href="?q={{ query }}&tab=ideas">Ideas</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if tab == 'users' %}active{% endif %}" href="?q={{ query }}&tab=users">Users</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if tab == 'categories' %}active{% endif %}" href="?q={{ query }}&tab=categories">Categories</a>
-        </li>
-    </ul>
+  /* Tabs */
+  .tabbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
 
-    <!-- Tab Content -->
-    <div class="tab-content mt-0">
-        {% if tab == 'ideas' %}
-            {% if ideas %}
-                {% for idea in ideas %}
-                    <div class="card mb-3 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ idea.title }}</h5>
-                            <p class="text-muted">{{ idea.category|title }}</p>
-                            <p>{{ idea.description|truncatechars:120 }}</p>
-                            <span>👍 {{ idea.likes.count }}</span>
-                            <a href="{% url 'idea_detail' idea.slug %}" class="btn btn-sm btn-primary ms-2">View</a>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No ideas found.</p>
-            {% endif %}
+  .tab-btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #f8f9fa;
+    transition: background .2s, color .2s, transform .2s;
+  }
+  .tab-btn:hover {
+    background: #e9ecef;
+  }
+  .tab-btn.is-active {
+    color: #fff;
+    transform: translateY(-2px);
+  }
 
-        {% elif tab == 'users' %}
-            {% if users %}
-                {% for user in users %}
-                    <div class="card mb-2 p-2 shadow-sm">
-                        <strong>{{ user.username }}</strong> - {{ user.first_name }} {{ user.last_name }}
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No users found.</p>
-            {% endif %}
+  /* Theme colors */
+  .tab-btn.red.is-active { background: #dc3545; }     /* Ideas */
+  .tab-btn.yellow.is-active { background: #ffc107; color:#000;} /* Users */
+  .tab-btn.blue.is-active { background: #0d6efd; }    /* Categories */
 
-        {% elif tab == 'categories' %}
-            {% if categories %}
-                <ul class="list-group">
-                    {% for cat in categories %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{% url 'search' %}?tab=ideas&cat={{ cat.category }}">{{ cat.category|title }}</a>
-                            <span class="badge bg-primary rounded-pill">{{ cat.count }}</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No categories found.</p>
-            {% endif %}
-        {% endif %}
-    </div>
+  /* Results */
+  .tab-panel {
+    min-height: 120px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 20px;
+  }
+
+  /* Card base */
+  .card-custom {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform .2s, box-shadow .2s, border-left-color .2s;
+  }
+  .card-custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+
+  .card-custom h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #343a40;
+  }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    color: #666;
+  }
+
+  .chip {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  /* Theme: Red (Ideas) */
+  .theme-red .card-custom { border-left: 5px solid #dc3545; }
+  .theme-red .card-custom:hover { border-left-color: #a71d2a; }
+  .theme-red .chip { background: #f8d7da; color: #842029; }
+  .theme-red .view-link { background: #dc3545; color:#fff; }
+  .theme-red .view-link:hover { background: #a71d2a; }
+
+  /* Theme: Yellow (Users) */
+  .theme-yellow .card-custom { border-left: 5px solid #ffc107; }
+  .theme-yellow .card-custom:hover { border-left-color: #e0a800; }
+  .theme-yellow .chip { background: #fff3cd; color: #856404; }
+  .theme-yellow .view-link { background: #ffc107; color:#000; }
+  .theme-yellow .view-link:hover { background: #e0a800; }
+
+  /* Theme: Blue (Categories) */
+  .theme-blue .card-custom { border-left: 5px solid #0d6efd; }
+  .theme-blue .card-custom:hover { border-left-color: #0a58ca; }
+  .theme-blue .chip { background: #cfe2ff; color: #084298; }
+  .theme-blue .view-link { background: #0d6efd; color:#fff; }
+  .theme-blue .view-link:hover { background: #0a58ca; }
+
+  .view-link {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .2s, transform .2s;
+  }
+  .view-link:hover { transform: translateY(-2px); }
+
+  .empty {
+    text-align: center;
+    padding: 30px 0;
+    color: #666;
+  }
+</style>
+
+<div class="search-container">
+  <input class="search-input" id="search-input" type="text" placeholder="Search ideas, users, categories…">
+
+  <nav class="tabbar">
+    <button class="tab-btn red is-active" data-tab="ideas">Ideas</button>
+    <button class="tab-btn yellow" data-tab="users">Users</button>
+    <button class="tab-btn blue" data-tab="categories">Categories</button>
+  </nav>
+
+  <section id="results" class="tab-panel theme-red">
+    <p class="empty">Loading…</p>
+  </section>
 </div>
+
+<script>
+  const searchInput = document.getElementById("search-input");
+  const results = document.getElementById("results");
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  let activeTab = "ideas";
+  let typingTimer;
+  let controller;
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      activeTab = btn.dataset.tab;
+
+      // set theme
+      results.className = `tab-panel theme-${btn.classList[1]}`;
+
+      runSearch();
+    });
+  });
+
+  searchInput.addEventListener("keyup", () => {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(runSearch, 400);
+  });
+
+  async function runSearch() {
+    const q = searchInput.value.trim();
+    if (controller) controller.abort();
+    controller = new AbortController();
+
+    try {
+      const res = await fetch(`/search/api/?q=${encodeURIComponent(q)}&tab=${activeTab}`, {
+        signal: controller.signal
+      });
+      if (!res.ok) throw new Error("Network error");
+      const data = await res.json();
+      renderResults(data);
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        results.innerHTML = `<p class="empty">Error loading results.</p>`;
+      }
+    }
+  }
+
+  function renderResults(data) {
+    if (!data.length) {
+      results.innerHTML = `<p class="empty">No ${activeTab} found.</p>`;
+      return;
+    }
+
+    if (activeTab === "ideas") {
+      results.innerHTML = `<div class="cards-grid">${
+        data.map(i => `
+          <article class="card-custom">
+            <h3>${i.title}</h3>
+            <p>${i.description || ""}</p>
+            <div class="meta">
+              <span class="chip">${i.category}</span>
+              <span>❤️ ${i.likes}</span>
+            </div>
+            <a href="/idea/${i.slug}/" class="view-link">View Idea</a>
+          </article>
+        `).join("")
+      }</div>`;
+    }
+
+    if (activeTab === "users") {
+      results.innerHTML = `<div class="cards-grid">${
+        data.map(u => `
+          <article class="card-custom">
+            <h3>@${u.username}</h3>
+            <p>${u.first_name || ""} ${u.last_name || ""}</p>
+            <small>${u.email || ""}</small>
+            <a href="/user/${u.username}/" class="view-link">View Profile</a>
+          </article>
+        `).join("")
+      }</div>`;
+    }
+
+    if (activeTab === "categories") {
+      results.innerHTML = `<div class="cards-grid">${
+        data.map(c => `
+          <article class="card-custom">
+            <h3>${c.category}</h3>
+            <p>${c.count} ideas</p>
+          </article>
+        `).join("")
+      }</div>`;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", runSearch);
+</script>
 {% endblock %}
