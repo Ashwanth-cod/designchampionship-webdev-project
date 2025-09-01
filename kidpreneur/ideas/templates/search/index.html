@@ -1,6 +1,46 @@
 {% extends 'base.html' %}
 {% block title %}Search{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Tabs: black background with visible text */
+.nav-tabs .nav-link {
+    border: 2px solid #000;        /* black border */
+    background-color: #000;        /* black background */
+    color: #fff !important;        /* white text visible on black */
+    border-bottom: none;
+    margin-right: -1px;
+    border-radius: 0.5rem 0.5rem 0 0;
+    transition: all 0.3s ease;
+}
+
+/* Active tab: gold text to highlight */
+.nav-tabs .nav-link.active {
+    background-color: #111;        /* slightly lighter black */
+    color: #ffd700 !important;     /* gold text */
+    border-bottom: 2px solid #111;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Hover effect: lighter black */
+.nav-tabs .nav-link:hover {
+    background-color: #222;
+    color: #ffd700 !important;     /* gold text on hover */
+    transform: translateY(-2px);
+}
+
+/* Tab Content Panel */
+.tab-content {
+    border: 2px solid #000;
+    border-radius: 0 0 0.5rem 0.5rem;
+    padding: 1rem;
+    background-color: #fff;        /* white content area */
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
 
@@ -11,7 +51,7 @@
     </form>
 
     <!-- Tabs -->
-    <ul class="nav nav-tabs mb-3" style="font-weight:bold; font-size:1.1rem;">
+    <ul class="nav nav-tabs mb-0" style="font-weight:bold; font-size:1.1rem;">
         <li class="nav-item">
             <a class="nav-link {% if tab == 'ideas' %}active{% endif %}" href="?q={{ query }}&tab=ideas">Ideas</a>
         </li>
@@ -24,7 +64,7 @@
     </ul>
 
     <!-- Tab Content -->
-    <div>
+    <div class="tab-content mt-0">
         {% if tab == 'ideas' %}
             {% if ideas %}
                 {% for idea in ideas %}
