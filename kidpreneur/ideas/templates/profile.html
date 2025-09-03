@@ -86,7 +86,7 @@
     <div class="username">@{{ user_obj.username }}</div>
     <div class="bio">{{ user_obj.profile.bio|default:"No bio yet." }}</div>
 
-    <div class="stats">
+    <div class="stats"> 
       <div>💡 Ideas: {{ stats.total_ideas }}</div>
       <div>❤️ Likes: {{ stats.total_likes }}</div>
       <div>🏷 Categories: {{ stats.unique_categories }}</div>
@@ -109,9 +109,9 @@
           {% else %}
             <span class="chip chip-blue">{{ idea.category }}</span>
           {% endif %}
-          <span class="likes">❤️ {{ idea.likes }}</span>
+          <span class="likes">❤️ {{ idea.total_likes }}</span>
         </div>
-        <a href="{% url 'idea_detail' idea.slug %}" class="view-link">View</a>
+        <a href="{% url 'idea-detail' idea.slug %}" class="view-link">View</a>
       </article>
       {% empty %}
       <p>No ideas yet.</p>

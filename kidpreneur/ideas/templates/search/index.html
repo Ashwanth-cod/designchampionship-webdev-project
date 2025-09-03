@@ -164,15 +164,15 @@
   let typingTimer;
   let controller;
 
+  const currentUser = "{{ request.user.username|escapejs }}";
+
   tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       tabButtons.forEach(b => b.classList.remove("is-active"));
       btn.classList.add("is-active");
       activeTab = btn.dataset.tab;
 
-      // set theme
       results.className = `tab-panel theme-${btn.classList[1]}`;
-
       runSearch();
     });
   });
@@ -215,7 +215,7 @@
             <p>${i.description || ""}</p>
             <div class="meta">
               <span class="chip">${i.category}</span>
-              <span>❤️ ${i.likes}</span>
+              <span>❤️ ${i.like_count ?? 0}</span>
             </div>
             <a href="/idea/${i.slug}/" class="view-link">View Idea</a>
           </article>
@@ -225,14 +225,29 @@
 
     if (activeTab === "users") {
       results.innerHTML = `<div class="cards-grid">${
-        data.map(u => `
-          <article class="card-custom">
-            <h3>@${u.username}</h3>
-            <p>${u.first_name || ""} ${u.last_name || ""}</p>
-            <small>${u.email || ""}</small>
-            <a href="/user/${u.username}/" class="view-link">View Profile</a>
-          </article>
-        `).join("")
+        data.map(u => {
+          let profileUrl;
+          if (u.username === currentUser) {
+            profileUrl = "/dashboard/";
+          } else if (u.username) {
+            profileUrl = `/user/${u.username}/`;
+          } else {
+            profileUrl = "#";
+          }
+
+          return `
+            <article class="card-custom">
+              <h3>
+                <a href="${profileUrl}" style="text-decoration:none;">
+                  @${u.username || "Unknown"}
+                </a>
+              </h3>
+              <p>${u.first_name || ""} ${u.last_name || ""}</p>
+              <small>${u.email || ""}</small>
+              <a href="${profileUrl}" class="view-link">View Profile</a>
+            </article>
+          `;
+        }).join("")
       }</div>`;
     }
 

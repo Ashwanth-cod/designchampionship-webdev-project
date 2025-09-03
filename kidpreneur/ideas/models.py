@@ -6,7 +6,6 @@ from django.utils.text import slugify
 # -------------------------
 # Custom User
 # -------------------------
-
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     dob = models.DateField(null=True, blank=True)
@@ -42,15 +41,20 @@ class Idea(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=250, unique=True, blank=True)
     description = models.TextField()
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
     created_by = models.ForeignKey(
-    settings.AUTH_USER_MODEL,
-    on_delete=models.CASCADE,
-    related_name="ideas",
-    null=False,
-    blank=False,
-)
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ideas",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # ⭐ NEW: Users can star/favorite ideas
+    starred_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="starred_ideas",
+        blank=True
+    )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -60,6 +64,7 @@ class Idea(models.Model):
     def __str__(self):
         return self.title
 
+    # Helper properties
     @property
     def total_likes(self):
         return self.likes.count()
@@ -75,6 +80,13 @@ class Idea(models.Model):
             return round(sum(r.score for r in ratings) / ratings.count(), 1)
         return 0
 
+    @property
+    def total_stars(self):
+        return self.starred_by.count()
+
+    def is_starred_by(self, user):
+        return self.starred_by.filter(id=user.id).exists()
+
 
 # -------------------------
 # Like Model
@@ -86,13 +98,21 @@ class Like(models.Model):
 
     class Meta:
         unique_together = ('idea', 'user')
-        
+
+
+# -------------------------
+# Comment Model
+# -------------------------
 class Comment(models.Model):
     idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+# -------------------------
+# Report Model
+# -------------------------
 class Report(models.Model):
     idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name='reports')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -100,7 +120,39 @@ class Report(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('idea', 'user')  # Optional: one report per user per idea
+        unique_together = ('idea', 'user')  # one report per user per idea
+
+
+# -------------------------
+# Rating Model
+# -------------------------
+class Rating(models.Model):
+    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="ratings")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    score = models.PositiveIntegerField(default=1)  # 1–5
+
+    class Meta:
+        unique_together = ("idea", "user")
+
+    def __str__(self):
+        return f"{self.score} by {self.user} on {self.idea}"
+
+
+# -------------------------
+# Translation Model
+# -------------------------
+class Translation(models.Model):
+    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="translations")
+    language_code = models.CharField(max_length=10)  # e.g. 'hi', 'ta', 'ml'
+    title_translated = models.CharField(max_length=200)
+    description_translated = models.TextField()
+
+    class Meta:
+        unique_together = ("idea", "language_code")
+
+    def __str__(self):
+        return f"{self.idea.title} ({self.language_code})"
+
 
 # -------------------------
 # Newsletter Subscriber

@@ -22,7 +22,7 @@ urlpatterns = [
 
     # Ideas
     path("idea/create/", views.idea_create, name="idea_create"),
-    path("idea/<slug:slug>/", views.idea_detail, name="idea_detail"),
+    path("idea/<slug:slug>/", views.idea_detail, name="idea-detail"),
     path("idea/<slug:slug>/edit/", views.idea_update, name="idea_update"),
     path("idea/<slug:slug>/delete/", views.idea_delete, name="idea_delete"),
 

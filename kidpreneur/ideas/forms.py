@@ -5,13 +5,6 @@ from .models import CustomUser, Idea, Subscriber
 # -------------------------
 # Signup Form
 # -------------------------
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
-
-
-
-
 class CustomUserCreationForm(UserCreationForm):
     dob = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}), required=True
@@ -35,21 +28,30 @@ class CustomUserCreationForm(UserCreationForm):
             "password2",
         ]
 
+
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'first_name', 'last_name']
+        fields = ['username', 'email', 'first_name', 'last_name', 'dob', 'phone_number', 'school_name', 'is_student']
+
 
 # -------------------------
 # Idea Form
 # -------------------------
 class IdeaForm(forms.ModelForm):
+    # Expanded list of categories
     CATEGORY_CHOICES = [
         ('tech', 'Technology'),
-        ('art', 'Art'),
-        ('education', 'Education'),
+        ('edu', 'Education'),
+        ('art', 'Art & Creativity'),
         ('science', 'Science'),
-        ('business', 'Business'),
+        ('business', 'Business & Entrepreneurship'),
+        ('health', 'Health & Wellness'),
+        ('gaming', 'Gaming'),
+        ('social', 'Social Impact'),
+        ('entertainment', 'Entertainment'),
+        ('sports', 'Sports & Fitness'),
+        ('travel', 'Travel & Lifestyle'),
         ('other', 'Other'),
     ]
 
@@ -63,7 +65,8 @@ class IdeaForm(forms.ModelForm):
         widget=forms.Textarea(attrs={
             'placeholder': 'Describe your idea...',
             'class': 'form-control',
-            'rows': 5
+            'rows': 7,             # taller textarea
+            'style': 'white-space: pre-wrap;'  # preserves line breaks and tabs
         })
     )
     category = forms.ChoiceField(
@@ -76,6 +79,7 @@ class IdeaForm(forms.ModelForm):
     class Meta:
         model = Idea
         fields = ['title', 'description', 'category']
+
 
 # -------------------------
 # Newsletter Form

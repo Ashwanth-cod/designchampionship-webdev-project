@@ -4,8 +4,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import Idea, Comment, Like, Subscriber, Report
-from django.db.models import Count, Sum
+from django.db.models import Count
+from .models import Idea, Comment, Like, Subscriber
 from .forms import CustomUserCreationForm, IdeaForm, SubscriberForm, UserUpdateForm
 
 User = get_user_model()
@@ -24,11 +24,13 @@ def search_api(request):
     tab = request.GET.get("tab", "ideas")
 
     if tab == "ideas":
-        qs = Idea.objects.all()
+        qs = Idea.objects.all().annotate(like_count=Count("likes"))
         if q:
             qs = qs.filter(title__icontains=q)
         qs = qs[:20]
-        data = list(qs.values("title", "slug", "category", "description", "likes"))
+        data = list(
+            qs.values("title", "slug", "category", "description", "like_count")
+        )
 
     elif tab == "users":
         qs = User.objects.all()
@@ -83,7 +85,7 @@ def dashboard_view(request):
     else:
         form = UserUpdateForm(instance=request.user)
 
-    ideas = Idea.objects.filter(created_by=request.user)
+    ideas = Idea.objects.filter(created_by=request.user).annotate(like_count=Count("likes"))
     return render(
         request,
         "dashboard.html",
@@ -105,11 +107,11 @@ def user_update(request):
 @login_required
 def user_view(request, username):
     user_obj = get_object_or_404(User, username=username)
-    ideas = getattr(user_obj, "ideas", None).all() if hasattr(user_obj, "ideas") else []
+    ideas = user_obj.ideas.all().annotate(like_count=Count("likes"))
 
     stats = {
         "total_ideas": ideas.count(),
-        "total_likes": ideas.aggregate(total=Sum("likes"))["total"] or 0,
+        "total_likes": sum(i.like_count for i in ideas),   # likes received
         "unique_categories": ideas.values("category").distinct().count(),
     }
 
@@ -123,9 +125,8 @@ def user_view(request, username):
 # --------------------------
 # Auth Views
 # --------------------------
-
 def signup_view(request):
-    next_url = request.GET.get("next") or request.POST.get("next")  # capture ?next=...
+    next_url = request.GET.get("next") or request.POST.get("next")
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -135,23 +136,24 @@ def signup_view(request):
             user.save()
             login(request, user)
             messages.success(request, f"Welcome, {user.username}! Your account has been created.")
-            return redirect(next_url or "dashboard")  # use next if available
+            return redirect(next_url or "dashboard")
     else:
         form = CustomUserCreationForm()
     return render(request, "auth/signup.html", {"form": form, "next": next_url})
 
 
 def login_view(request):
-    next_url = request.GET.get("next") or request.POST.get("next")  # capture ?next=...
+    next_url = request.GET.get("next") or request.POST.get("next")
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect(next_url or "dashboard")  # use next if available
+            return redirect(next_url or "dashboard")
     else:
         form = AuthenticationForm(request)
     return render(request, "auth/login.html", {"form": form, "next": next_url})
+
 
 @login_required
 def logout_view(request):
@@ -160,39 +162,58 @@ def logout_view(request):
 
 
 # --------------------------
-# Idea CRUD + AJAX Like Toggle
+# Idea CRUD + Like Toggle
 # --------------------------
 @login_required
 def idea_detail(request, slug):
     idea = get_object_or_404(Idea, slug=slug)
     user_liked = Like.objects.filter(idea=idea, user=request.user).exists()
+
+    if request.method == "POST":
+        if "like_toggle" in request.POST:
+            if user_liked:
+                Like.objects.filter(idea=idea, user=request.user).delete()
+            else:
+                Like.objects.create(idea=idea, user=request.user)
+            return redirect("idea-detail", slug=slug)
+
+        if "comment_text" in request.POST:
+            text = request.POST.get("comment_text")
+            if text.strip():
+                Comment.objects.create(idea=idea, user=request.user, text=text)
+            return redirect("idea-detail", slug=slug)
+
     comments = idea.comments.all().order_by("-created_at")
+    like_count = Like.objects.filter(idea=idea).count()
 
     context = {
         "idea": idea,
         "user_liked": user_liked,
         "comments": comments,
-        "like_count": Like.objects.filter(idea=idea).count(),
+        "like_count": like_count,
     }
     return render(request, "ideas/idea_detail.html", context)
 
 
+def idea_list(request):
+    ideas = Idea.objects.annotate(like_count=Count("likes"))
+    return render(request, "ideas/list.html", {"ideas": ideas})
+
+
 @login_required
 def toggle_like(request, slug):
-    """AJAX endpoint for toggling like/unlike."""
     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
         idea = get_object_or_404(Idea, slug=slug)
         like, created = Like.objects.get_or_create(idea=idea, user=request.user)
-        if not created:  # already liked -> unlike
+        if not created:
             like.delete()
             liked = False
         else:
             liked = True
 
-        return JsonResponse({
-            "liked": liked,
-            "like_count": Like.objects.filter(idea=idea).count(),
-        })
+        like_count = Like.objects.filter(idea=idea).count()
+        return JsonResponse({"liked": liked, "like_count": like_count})
+
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
