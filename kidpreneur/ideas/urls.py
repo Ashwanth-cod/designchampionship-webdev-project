@@ -12,8 +12,9 @@ urlpatterns = [
 
     # Dashboard / Profile
     path("dashboard/", views.dashboard_view, name="dashboard"),
-    path("user/update/", views.user_update, name="user_update"),
-    path("user/<str:username>/", views.user_view, name="user-profile"),
+    path("people/update/", views.user_update, name="user_update"),
+    path("people/<str:username>/", views.profile_view, name="user-profile"),
+    path("follow/<str:username>/", views.toggle_follow, name="toggle_follow"),
 
     # Auth
     path("signup/", views.signup_view, name="signup"),
@@ -25,7 +26,5 @@ urlpatterns = [
     path("idea/<slug:slug>/", views.idea_detail, name="idea-detail"),
     path("idea/<slug:slug>/edit/", views.idea_update, name="idea_update"),
     path("idea/<slug:slug>/delete/", views.idea_delete, name="idea_delete"),
-
-    # Newsletter
-    path("subscribe/", views.subscribe_newsletter, name="subscribe_newsletter"),
-]
+    path("idea/<slug:slug>/star/", views.toggle_star, name="toggle_star"),
+]   

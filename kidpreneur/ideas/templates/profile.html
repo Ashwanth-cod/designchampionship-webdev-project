@@ -1,123 +1,247 @@
 {% extends "base.html" %}
 {% block title %}Profile · {{ user_obj.username }}{% endblock %}
+{% load humanize %}
+{% load static %}
 
 {% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 <style>
   :root {
-    --card:#ffffff; --border:#e5e7eb;
-    --text:#111827; --muted:#6b7280;
-    --accent-red:#f87171; --accent-yellow:#facc15; --accent-blue:#60a5fa;
+    --text: #0f172a;
+    --muted: #555;
+    --card: #ffffff;
+    --border: #e3e9f2;
+    --shadow: 0 10px 28px rgba(14, 35, 68, 0.08);
+    --radius: 14px;
+    --gap: 20px;
   }
 
-  body {
-    color: var(--text);
-  }
-
-  .profile-container{
-    max-width:1100px; margin:32px auto; padding:0 16px;
-    display:grid; grid-template-columns:280px 1fr; gap:24px;
+  .profile-container {
+    max-width: 1200px;
+    margin: 32px auto;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
   }
 
   /* Sidebar */
-  .sidebar{
-    background:var(--card); border:1px solid var(--border);
-    border-radius:16px; padding:24px; text-align:center;
-    box-shadow:0 2px 6px rgba(0,0,0,0.05);
-  }
-  .avatar{
-    width:120px; height:120px; border-radius:50%;
-    background:var(--accent-blue); color:white;
-    display:flex; align-items:center; justify-content:center;
-    font-size:2rem; font-weight:700; margin:0 auto 16px;
-  }
-  .user-name{ font-size:1.4rem; font-weight:700; margin-bottom:4px; }
-  .username{ color:var(--muted); margin-bottom:12px; }
-  .bio{ font-size:0.95rem; color:var(--text); margin-bottom:12px; }
-  .stats{ display:grid; gap:8px; margin-top:16px; font-size:0.9rem; color:var(--muted); }
-  .stats div{ padding:8px; border-radius:8px; background:#f3f4f6; }
-
-  /* Main */
-  .main h2{ font-size:1.3rem; font-weight:600; margin-bottom:16px; }
-  .cards-grid{
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px;
+  .sidebar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
   }
 
-  .idea-card{
-    background:var(--card); border:1px solid var(--border);
-    border-radius:16px; padding:16px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.05);
-    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  .avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #2196f3, #21cbf3);
+    border: 4px solid var(--border);
   }
-  .idea-card:hover{
-    transform:translateY(-4px);
-    box-shadow:0 6px 12px rgba(0,0,0,0.1);
+
+  .user-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+  .username { color: var(--muted); margin-bottom: 12px; }
+  .bio { font-size: 0.95rem; color: var(--text); margin-bottom: 16px; }
+
+  .profile-actions button {
+    margin: 6px 0;
+    width: 100%;
   }
-  .idea-title{ font-weight:600; margin-bottom:8px; }
-  .chip{
-    display:inline-block; padding:4px 10px; border-radius:999px;
-    font-size:.8rem; font-weight:500;
+
+  .sidebar-footer {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--muted);
   }
-  .chip-red{ background:var(--accent-red); color:white; }
-  .chip-yellow{ background:var(--accent-yellow); color:#111; }
-  .chip-blue{ background:var(--accent-blue); color:white; }
-  .meta{
-    display:flex; justify-content:space-between; align-items:center;
-    margin-top:8px; font-size:0.85rem; color:var(--muted);
+
+  /* Stats cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
+    gap: 12px;
+    margin-bottom: 20px;
   }
-  .likes{ font-weight:600; color:var(--accent-red); }
-  .view-link{
-    display:inline-block; margin-top:8px;
-    font-size:0.9rem; font-weight:500;
-    color:var(--accent-blue); text-decoration:none;
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
   }
-  .view-link:hover{ text-decoration:underline; }
+
+  .stat-value { font-size: 1.4rem; font-weight: 700; }
+  .stat-label { font-size: 0.9rem; color: var(--muted); }
+
+  /* Tabs */
+  .profile-tabs { margin-bottom: 16px; display: flex; gap: 10px; list-style: none; padding: 0; }
+  .profile-tabs .nav-link {
+    padding: 10px 16px;
+    border-radius: 12px 12px 0 0;
+    cursor: pointer;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: #f0f0f0;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .profile-tabs .nav-link.active { background: #2196f3; color: #fff; }
+  .profile-tabs .nav-link:hover { transform: translateY(-2px); }
+
+  /* Cards grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 20px;
+  }
+
+  /* Dashboard-style cards */
+  .card-custom {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+    transition: transform .22s ease, box-shadow .22s ease;
+  }
+  .card-custom:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(14,35,68,0.14);
+  }
+
+  .chip {
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:.85rem;
+    background:#e3f2fd;
+    color:#003c7e;
+  }
+
+  .view-link {
+    display:inline-block;
+    margin-top:10px;
+    padding:8px 14px;
+    border-radius:10px;
+    font-weight:700;
+    text-decoration:none;
+    transition: transform .12s ease, box-shadow .12s ease;
+    color: #fff;
+    background: #2196f3;
+  }
+  .view-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(14,35,68,0.07);
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="profile-container">
+<div class="profile-container theme-blue">
 
   <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="avatar">
-      {{ user_obj.username|first|upper }}
-    </div>
+    <div class="avatar">{{ user_obj.username|slice:":1"|upper }} <span>{{user_obj.username|slice:"1:2"|lower }}</span></div>
     <div class="user-name">{{ user_obj.get_full_name|default:user_obj.username }}</div>
     <div class="username">@{{ user_obj.username }}</div>
     <div class="bio">{{ user_obj.profile.bio|default:"No bio yet." }}</div>
 
-    <div class="stats"> 
-      <div>💡 Ideas: {{ stats.total_ideas }}</div>
-      <div>❤️ Likes: {{ stats.total_likes }}</div>
-      <div>🏷 Categories: {{ stats.unique_categories }}</div>
+    <div class="profile-actions">
+  {% if request.user != user_obj %}
+    <button 
+      id="followBtn" 
+      class="btn btn-fun-blue"
+      data-username="{{ user_obj.username }}">
+      {% if is_following %}
+        Unfollow
+      {% else %}
+        Follow
+      {% endif %}
+    </button>
+  {% endif %}
+  <button class="btn btn-fun-yellow">Message</button>
+</div>
+
+
+    <div class="sidebar-footer">
+      Joined: {{ user_obj.date_joined|date:"M Y" }} <br>
+      Last active: {{ user_obj.last_login|timesince }} ago
     </div>
   </aside>
 
-  <!-- Main content -->
-  <main class="main">
-    <h2>Ideas</h2>
-    <div class="cards-grid">
+  <!-- Main -->
+  <main>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value">{{ stats.total_ideas }}</div><div class="stat-label">Ideas</div></div>
+      <div class="stat-card"><div class="stat-value">{{ stats.total_likes }}</div><div class="stat-label">Likes</div></div>
+      <div class="stat-card"><div class="stat-value">{{ stats.unique_categories }}</div><div class="stat-label">Categories</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="profile-tabs">
+      <li><button class="nav-link active" data-tab="ideas">Ideas</button></li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="cards-grid" id="tab-ideas">
       {% for idea in ideas %}
-      <article class="idea-card">
+      <article class="card-custom idea-card">
         <h3 class="idea-title">{{ idea.title }}</h3>
         <p>{{ idea.description|truncatechars:120 }}</p>
         <div class="meta">
-          {% if idea.category == "Red" %}
-            <span class="chip chip-red">{{ idea.category }}</span>
-          {% elif idea.category == "Yellow" %}
-            <span class="chip chip-yellow">{{ idea.category }}</span>
-          {% else %}
-            <span class="chip chip-blue">{{ idea.category }}</span>
-          {% endif %}
+          <span class="chip">{{ idea.category }}</span>
           <span class="likes">❤️ {{ idea.total_likes }}</span>
         </div>
         <a href="{% url 'idea-detail' idea.slug %}" class="view-link">View</a>
       </article>
       {% empty %}
-      <p>No ideas yet.</p>
+      <p class="empty">No ideas yet.</p>
       {% endfor %}
     </div>
   </main>
-
 </div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.profile-tabs .nav-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.profile-tabs .nav-link').forEach(n => n.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.cards-grid').forEach(grid => grid.style.display = 'none');
+      document.getElementById('tab-' + tab).style.display = 'grid';
+    });
+  });
+
+  // Follow button toggle
+  document.getElementById("followBtn")?.addEventListener("click", async function() {
+    const username = this.dataset.username;
+    const res = await fetch(`/follow/${username}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    });
+    const data = await res.json();
+    if (data.status === "followed") {
+      this.textContent = "Unfollow";
+    } else if (data.status === "unfollowed") {
+      this.textContent = "Follow";
+    }
+  });
+</script>
 {% endblock %}

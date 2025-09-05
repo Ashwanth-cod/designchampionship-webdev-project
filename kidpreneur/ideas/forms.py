@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, Idea, Subscriber
+from .models import CustomUser, Idea
 
 # -------------------------
 # Signup Form
@@ -79,19 +79,3 @@ class IdeaForm(forms.ModelForm):
     class Meta:
         model = Idea
         fields = ['title', 'description', 'category']
-
-
-# -------------------------
-# Newsletter Form
-# -------------------------
-class SubscriberForm(forms.ModelForm):
-    email = forms.EmailField(
-        widget=forms.EmailInput(attrs={
-            'placeholder': 'Enter your email',
-            'class': 'form-control'
-        })
-    )
-
-    class Meta:
-        model = Subscriber
-        fields = ['email']

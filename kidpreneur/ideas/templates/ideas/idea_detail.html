@@ -97,10 +97,19 @@
         </button>
       </form>
 
-      <!-- Star (client-side only) -->
-      <button id="starBtn" class="star-btn">
-        ⭐ Star this idea
-      </button>
+      <!-- Star (server-side) -->
+        <form method="post" action="{% url 'toggle_star' idea.slug %}">
+          {% csrf_token %}
+          <button type="submit" 
+            class="star-btn {% if request.user in idea.starred_by.all %}starred{% endif %}">
+            {% if request.user in idea.starred_by.all %}
+              ⭐ Unstar this idea
+            {% else %}
+              ⭐ Star this idea
+            {% endif %}
+          </button>
+        </form>
+
 
       <!-- Report -->
       <form method="post" class="report">

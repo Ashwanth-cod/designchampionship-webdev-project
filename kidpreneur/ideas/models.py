@@ -28,14 +28,41 @@ class CustomUser(AbstractUser):
 
 
 # -------------------------
+# Follow Model
+# -------------------------
+class Follow(models.Model):
+    follower = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="following"
+    )
+    following = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="followers"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("follower", "following")
+
+    def __str__(self):
+        return f"{self.follower} follows {self.following}"
+
+
+# -------------------------
 # Idea Model
 # -------------------------
 class Idea(models.Model):
     CATEGORY_CHOICES = [
-        ('tech', 'Technology'),
-        ('edu', 'Education'),
-        ('art', 'Art'),
-        ('other', 'Other')
+        ("tech", "Technology"),
+        ("edu", "Education"),
+        ("art", "Art & Creativity"),
+        ("science", "Science"),
+        ("business", "Business & Entrepreneurship"),
+        ("health", "Health & Wellness"),
+        ("gaming", "Gaming"),
+        ("social", "Social Impact"),
+        ("entertainment", "Entertainment"),
+        ("sports", "Sports & Fitness"),
+        ("travel", "Travel & Lifestyle"),
+        ("other", "Other"),
     ]
 
     title = models.CharField(max_length=200)
@@ -45,16 +72,18 @@ class Idea(models.Model):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="ideas",
+        related_name="ideas",       
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # ⭐ NEW: Users can star/favorite ideas
     starred_by = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         related_name="starred_ideas",
-        blank=True
+        blank=True,
     )
+
+    # NEW: archive flag
+    is_archived = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -64,7 +93,6 @@ class Idea(models.Model):
     def __str__(self):
         return self.title
 
-    # Helper properties
     @property
     def total_likes(self):
         return self.likes.count()
@@ -92,74 +120,19 @@ class Idea(models.Model):
 # Like Model
 # -------------------------
 class Like(models.Model):
-    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name='likes')
+    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="likes")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('idea', 'user')
+        unique_together = ("idea", "user")
 
 
 # -------------------------
 # Comment Model
 # -------------------------
 class Comment(models.Model):
-    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name='comments')
+    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-
-
-# -------------------------
-# Report Model
-# -------------------------
-class Report(models.Model):
-    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name='reports')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    reason = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('idea', 'user')  # one report per user per idea
-
-
-# -------------------------
-# Rating Model
-# -------------------------
-class Rating(models.Model):
-    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="ratings")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    score = models.PositiveIntegerField(default=1)  # 1–5
-
-    class Meta:
-        unique_together = ("idea", "user")
-
-    def __str__(self):
-        return f"{self.score} by {self.user} on {self.idea}"
-
-
-# -------------------------
-# Translation Model
-# -------------------------
-class Translation(models.Model):
-    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="translations")
-    language_code = models.CharField(max_length=10)  # e.g. 'hi', 'ta', 'ml'
-    title_translated = models.CharField(max_length=200)
-    description_translated = models.TextField()
-
-    class Meta:
-        unique_together = ("idea", "language_code")
-
-    def __str__(self):
-        return f"{self.idea.title} ({self.language_code})"
-
-
-# -------------------------
-# Newsletter Subscriber
-# -------------------------
-class Subscriber(models.Model):
-    email = models.EmailField(unique=True)
-    subscribed_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.email

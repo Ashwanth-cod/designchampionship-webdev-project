@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Search{% endblock %}
-{% load humanize %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -10,7 +10,6 @@
     padding: 0 20px;
   }
 
-  /* Input */
   .search-input {
     width: 100%;
     padding: 12px 16px;
@@ -20,138 +19,70 @@
     font-size: 1rem;
     margin-bottom: 20px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    transition: border-color .2s, box-shadow .2s;
   }
-  .search-input:focus {
-    border-color: #000;
-    box-shadow: 0 0 6px rgba(0,0,0,0.1);
-  }
+  .search-input:focus { border-color: #000; }
 
-  /* Tabs */
   .tabbar {
     display: flex;
     gap: 8px;
+    align-items: center;
     margin-bottom: 20px;
   }
-
   .tab-btn {
     padding: 10px 18px;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    background: #f8f9fa;
-    transition: background .2s, color .2s, transform .2s;
+    transition: transform .2s, box-shadow .2s;
   }
-  .tab-btn:hover {
-    background: #e9ecef;
-  }
-  .tab-btn.is-active {
-    color: #fff;
-    transform: translateY(-2px);
-  }
+  .tab-btn.red { background: #f8d7da; color: #842029; }
+  .tab-btn.yellow { background: #fff3cd; color: #856404; }
+  .tab-btn.blue { background: #cfe2ff; color: #084298; }
+  .tab-btn.green { background: #d1e7dd; color: #0f5132; } /* NEW for archive */
+  .tab-btn.is-active { transform: translateY(-2px); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
 
-  /* Theme colors */
-  .tab-btn.red.is-active { background: #dc3545; }     /* Ideas */
-  .tab-btn.yellow.is-active { background: #ffc107; color:#000;} /* Users */
-  .tab-btn.blue.is-active { background: #0d6efd; }    /* Categories */
-
-  /* Results */
-  .tab-panel {
-    min-height: 120px;
-  }
-
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
-    gap: 20px;
-  }
-
-  /* Card base */
-  .card-custom {
-    background: #fff;
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: transform .2s, box-shadow .2s, border-left-color .2s;
-  }
-  .card-custom:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-  }
-
-  .card-custom h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #343a40;
-  }
-
-  .meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    margin-top: 10px;
-    color: #666;
-  }
-
-  .chip {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-
-  /* Theme: Red (Ideas) */
-  .theme-red .card-custom { border-left: 5px solid #dc3545; }
-  .theme-red .card-custom:hover { border-left-color: #a71d2a; }
-  .theme-red .chip { background: #f8d7da; color: #842029; }
-  .theme-red .view-link { background: #dc3545; color:#fff; }
-  .theme-red .view-link:hover { background: #a71d2a; }
-
-  /* Theme: Yellow (Users) */
-  .theme-yellow .card-custom { border-left: 5px solid #ffc107; }
-  .theme-yellow .card-custom:hover { border-left-color: #e0a800; }
-  .theme-yellow .chip { background: #fff3cd; color: #856404; }
-  .theme-yellow .view-link { background: #ffc107; color:#000; }
-  .theme-yellow .view-link:hover { background: #e0a800; }
-
-  /* Theme: Blue (Categories) */
-  .theme-blue .card-custom { border-left: 5px solid #0d6efd; }
-  .theme-blue .card-custom:hover { border-left-color: #0a58ca; }
-  .theme-blue .chip { background: #cfe2ff; color: #084298; }
-  .theme-blue .view-link { background: #0d6efd; color:#fff; }
-  .theme-blue .view-link:hover { background: #0a58ca; }
-
-  .view-link {
-    display: inline-block;
-    margin-top: 12px;
-    padding: 8px 14px;
+  .sort-select {
+    margin-left: auto;
+    padding: 8px 12px;
+    border: 2px solid #ccc;
     border-radius: 8px;
+    font-size: 0.95rem;
     font-weight: 600;
-    text-decoration: none;
-    transition: background .2s, transform .2s;
+    cursor: pointer;
   }
-  .view-link:hover { transform: translateY(-2px); }
 
-  .empty {
-    text-align: center;
-    padding: 30px 0;
-    color: #666;
-  }
+  .description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* limits to 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+  .tab-panel { min-height: 120px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 20px; }
+  .card-custom { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .card-custom h3 { margin-bottom: 8px; font-size: 1.2rem; }
+  .meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.9rem; color: #666; }
+  .view-link { display: inline-block; margin-top: 10px; padding: 8px 14px; border-radius: 8px; background: #2196f3; color: white; text-decoration: none; }
 </style>
 
 <div class="search-container">
-  <input class="search-input" id="search-input" type="text" placeholder="Search ideas, users, categories…">
+  <input class="search-input" id="search-input" type="text" placeholder="Search creations, people, categories…">
 
   <nav class="tabbar">
-    <button class="tab-btn red is-active" data-tab="ideas">Ideas</button>
-    <button class="tab-btn yellow" data-tab="users">Users</button>
+    <button class="tab-btn red is-active" data-tab="ideas">Creations</button>
+    <button class="tab-btn yellow" data-tab="users">People</button>
     <button class="tab-btn blue" data-tab="categories">Categories</button>
+    <select id="sort-select" class="sort-select"></select>
+    <select id="sort-order" class="sort-select">
+        <option value="asc">Ascending</option>
+        <option value="desc" selected>Descending</option>
+      </select>
   </nav>
 
-  <section id="results" class="tab-panel theme-red">
+  <section id="results" class="tab-panel">
     <p class="empty">Loading…</p>
   </section>
 </div>
@@ -160,9 +91,33 @@
   const searchInput = document.getElementById("search-input");
   const results = document.getElementById("results");
   const tabButtons = document.querySelectorAll(".tab-btn");
+  const sortSelect = document.getElementById("sort-select");
   let activeTab = "ideas";
   let typingTimer;
   let controller;
+  let activeCategory = "";
+
+  const sortOptions = {
+    ideas: [
+      { value: "recent", label: "Most Recent" },
+      { value: "popular", label: "Most Liked" },
+      { value: "title", label: "Title A–Z" }
+    ],
+    users: [
+      { value: "recent", label: "Recently Joined" },
+      { value: "name", label: "Name A–Z" }
+    ],
+    categories: [
+      { value: "count", label: "Most Ideas" },
+      { value: "alpha", label: "A–Z" }
+    ],
+  };
+
+  function updateSortOptions() {
+    sortSelect.innerHTML = sortOptions[activeTab]
+      .map(opt => `<option value="${opt.value}">${opt.label}</option>`)
+      .join("");
+  }
 
   const currentUser = "{{ request.user.username|escapejs }}";
 
@@ -171,11 +126,14 @@
       tabButtons.forEach(b => b.classList.remove("is-active"));
       btn.classList.add("is-active");
       activeTab = btn.dataset.tab;
-
-      results.className = `tab-panel theme-${btn.classList[1]}`;
+      activeCategory = "";
+      results.className = "tab-panel";
+      updateSortOptions();
       runSearch();
     });
   });
+
+  sortSelect.addEventListener("change", runSearch);
 
   searchInput.addEventListener("keyup", () => {
     clearTimeout(typingTimer);
@@ -184,13 +142,17 @@
 
   async function runSearch() {
     const q = searchInput.value.trim();
+    const sort = sortSelect.value;
     if (controller) controller.abort();
     controller = new AbortController();
 
+    document.getElementById("sort-order").addEventListener("change", runSearch);
+    const order = document.getElementById("sort-order").value;
+    let url = `/search/api/?q=${encodeURIComponent(q)}&tab=${activeTab}&sort=${sort}&order=${order}`;
+    if (activeCategory) url += `&category=${encodeURIComponent(activeCategory)}`;
+
     try {
-      const res = await fetch(`/search/api/?q=${encodeURIComponent(q)}&tab=${activeTab}`, {
-        signal: controller.signal
-      });
+      const res = await fetch(url, { signal: controller.signal });
       if (!res.ok) throw new Error("Network error");
       const data = await res.json();
       renderResults(data);
@@ -207,41 +169,13 @@
       return;
     }
 
-    if (activeTab === "ideas") {
-      results.innerHTML = `<div class="cards-grid">${
-        data.map(i => `
-          <article class="card-custom">
-            <h3>${i.title}</h3>
-            <p>${i.description || ""}</p>
-            <div class="meta">
-              <span class="chip">${i.category}</span>
-              <span>❤️ ${i.like_count ?? 0}</span>
-            </div>
-            <a href="/idea/${i.slug}/" class="view-link">View Idea</a>
-          </article>
-        `).join("")
-      }</div>`;
-    }
-
     if (activeTab === "users") {
       results.innerHTML = `<div class="cards-grid">${
         data.map(u => {
-          let profileUrl;
-          if (u.username === currentUser) {
-            profileUrl = "/dashboard/";
-          } else if (u.username) {
-            profileUrl = `/user/${u.username}/`;
-          } else {
-            profileUrl = "#";
-          }
-
+          const profileUrl = u.username === currentUser ? "/dashboard/" : `/user/${u.username}/`;
           return `
             <article class="card-custom">
-              <h3>
-                <a href="${profileUrl}" style="text-decoration:none;">
-                  @${u.username || "Unknown"}
-                </a>
-              </h3>
+              <h3><a href="${profileUrl}">@${u.username || "Unknown"}</a></h3>
               <p>${u.first_name || ""} ${u.last_name || ""}</p>
               <small>${u.email || ""}</small>
               <a href="${profileUrl}" class="view-link">View Profile</a>
@@ -254,15 +188,30 @@
     if (activeTab === "categories") {
       results.innerHTML = `<div class="cards-grid">${
         data.map(c => `
-          <article class="card-custom">
+          <article class="card-custom category-card" data-category="${c.category}">
             <h3>${c.category}</h3>
             <p>${c.count} ideas</p>
           </article>
         `).join("")
       }</div>`;
+
+      document.querySelectorAll(".category-card").forEach(card => {
+        card.addEventListener("click", () => {
+          activeTab = "ideas";
+          activeCategory = card.dataset.category;
+          tabButtons.forEach(b => b.classList.remove("is-active"));
+          document.querySelector(".tab-btn.red").classList.add("is-active");
+          results.className = "tab-panel";
+          updateSortOptions();
+          runSearch();
+        });
+      });
     }
   }
 
-  document.addEventListener("DOMContentLoaded", runSearch);
+  document.addEventListener("DOMContentLoaded", () => {
+    updateSortOptions();
+    runSearch();
+  });
 </script>
 {% endblock %}

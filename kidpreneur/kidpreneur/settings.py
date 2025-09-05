@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     'ideas',
     'django.contrib.humanize',
     "widget_tweaks",
-    'grappelli'
 ]
 
 MIDDLEWARE = [
