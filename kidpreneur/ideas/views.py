@@ -5,7 +5,8 @@ from django.contrib.auth import authenticate
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
+from django.utils.timezone import now
 from .models import Idea, Comment, Like, Follow, CustomUser
 from .forms import CustomUserCreationForm, IdeaForm, UserUpdateForm
 
@@ -135,22 +136,32 @@ def basetest_view(request):
 # --------------------------
 @login_required(login_url='/login/')
 def dashboard_view(request):
-    ideas = Idea.objects.filter(created_by=request.user)
-    starred_ideas = request.user.starred_ideas.all()  # ManyToMany reverse
+    user = request.user
 
-    user_form = UserUpdateForm(instance=request.user)
+    ideas = Idea.objects.filter(created_by=user, is_archived=False)
+    starred_ideas = user.starred_ideas.all()
+    archived_ideas = Idea.objects.filter(created_by=user, is_archived=True)
+    total_likes = ideas.aggregate(total=Sum('likes'))['total'] or 0
+    days_since_joined = (now() - user.date_joined).days
+
+    user_form = UserUpdateForm(instance=user)
 
     if request.method == "POST" and "profile_update" in request.POST:
-        user_form = UserUpdateForm(request.POST, instance=request.user)
+        user_form = UserUpdateForm(request.POST, instance=user)
         if user_form.is_valid():
             user_form.save()
             return redirect("dashboard")
 
-    return render(request, "dashboard.html", {
+    context = {
         "ideas": ideas,
         "starred_ideas": starred_ideas,
+        "archived_ideas": archived_ideas,
+        "total_likes": total_likes,
+        "days_since_joined": days_since_joined,
         "user_form": user_form,
-    })
+    }
+
+    return render(request, "dashboard.html", context)
 
 @require_POST
 @login_required(login_url='/login/')
