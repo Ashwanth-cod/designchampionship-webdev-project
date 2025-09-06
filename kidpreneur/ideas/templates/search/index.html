@@ -72,7 +72,7 @@
   <input class="search-input" id="search-input" type="text" placeholder="Search creations, people, categories…">
 
   <nav class="tabbar">
-    <button class="tab-btn red is-active" data-tab="ideas">Creations</button>
+    <button class="tab-btn red is-active" data-tab="creations">Creations</button>
     <button class="tab-btn yellow" data-tab="users">People</button>
     <button class="tab-btn blue" data-tab="categories">Categories</button>
     <select id="sort-select" class="sort-select"></select>
@@ -87,18 +87,20 @@
   </section>
 </div>
 
+
 <script>
   const searchInput = document.getElementById("search-input");
   const results = document.getElementById("results");
   const tabButtons = document.querySelectorAll(".tab-btn");
   const sortSelect = document.getElementById("sort-select");
-  let activeTab = "ideas";
+  const sortOrder = document.getElementById("sort-order");
+  let activeTab = "creations";
   let typingTimer;
   let controller;
   let activeCategory = "";
 
   const sortOptions = {
-    ideas: [
+    creations: [
       { value: "recent", label: "Most Recent" },
       { value: "popular", label: "Most Liked" },
       { value: "title", label: "Title A–Z" }
@@ -108,7 +110,7 @@
       { value: "name", label: "Name A–Z" }
     ],
     categories: [
-      { value: "count", label: "Most Ideas" },
+      { value: "count", label: "Most creations" },
       { value: "alpha", label: "A–Z" }
     ],
   };
@@ -117,6 +119,8 @@
     sortSelect.innerHTML = sortOptions[activeTab]
       .map(opt => `<option value="${opt.value}">${opt.label}</option>`)
       .join("");
+    // Reset sort order to default on tab change
+    sortOrder.value = "desc";
   }
 
   const currentUser = "{{ request.user.username|escapejs }}";
@@ -134,6 +138,7 @@
   });
 
   sortSelect.addEventListener("change", runSearch);
+  sortOrder.addEventListener("change", runSearch);
 
   searchInput.addEventListener("keyup", () => {
     clearTimeout(typingTimer);
@@ -143,11 +148,11 @@
   async function runSearch() {
     const q = searchInput.value.trim();
     const sort = sortSelect.value;
+    const order = sortOrder.value;
+
     if (controller) controller.abort();
     controller = new AbortController();
 
-    document.getElementById("sort-order").addEventListener("change", runSearch);
-    const order = document.getElementById("sort-order").value;
     let url = `/search/api/?q=${encodeURIComponent(q)}&tab=${activeTab}&sort=${sort}&order=${order}`;
     if (activeCategory) url += `&category=${encodeURIComponent(activeCategory)}`;
 
@@ -169,7 +174,21 @@
       return;
     }
 
-    if (activeTab === "users") {
+    if (activeTab === "creations") {
+      results.innerHTML = `<div class="cards-grid">${
+        data.map(idea => `
+          <article class="card-custom">
+            <h3>${idea.title}</h3>
+            <p class="description">${idea.description || "No description available."}</p>
+            <div class="meta">
+              <span>${idea.created_by || "Unknown Author"}</span>
+              <span>${idea.likes} likes</span>
+            </div>
+            <a href="/idea/${idea.slug}/" class="view-link">View Idea</a>
+          </article>
+        `).join("")
+      }</div>`;
+    } else if (activeTab === "users") {
       results.innerHTML = `<div class="cards-grid">${
         data.map(u => {
           const profileUrl = u.username === currentUser ? "/dashboard/" : `/user/${u.username}/`;
@@ -183,21 +202,19 @@
           `;
         }).join("")
       }</div>`;
-    }
-
-    if (activeTab === "categories") {
+    } else if (activeTab === "categories") {
       results.innerHTML = `<div class="cards-grid">${
         data.map(c => `
           <article class="card-custom category-card" data-category="${c.category}">
             <h3>${c.category}</h3>
-            <p>${c.count} ideas</p>
+            <p>${c.count} creations</p>
           </article>
         `).join("")
       }</div>`;
 
       document.querySelectorAll(".category-card").forEach(card => {
         card.addEventListener("click", () => {
-          activeTab = "ideas";
+          activeTab = "creations";
           activeCategory = card.dataset.category;
           tabButtons.forEach(b => b.classList.remove("is-active"));
           document.querySelector(".tab-btn.red").classList.add("is-active");
@@ -214,4 +231,5 @@
     runSearch();
   });
 </script>
+
 {% endblock %}

@@ -14,7 +14,8 @@ User = get_user_model()
 # --------------------------
 # Search
 # --------------------------
-@login_required
+
+@login_required(login_url='/login/')
 def search_page(request):
     query = request.GET.get("q", "")
     category = request.GET.get("category", "")
@@ -35,18 +36,19 @@ def search_page(request):
     }
     return render(request, "search/index.html", context)
 
-@login_required
+@login_required(login_url='/login/')
 def search_api(request):
     q = request.GET.get("q", "").strip()
-    tab = request.GET.get("tab", "ideas")
+    tab = request.GET.get("tab", "creations")  # Default 'creations'
     sort = request.GET.get("sort", "recent")
-    order = request.GET.get("order", "desc")  # NEW
+    order = request.GET.get("order", "desc")
     category = request.GET.get("category", "").strip()
 
     reverse = order == "desc"
 
-    if tab == "ideas":
-        qs = Idea.objects.all().annotate(like_count=Count("likes"))
+    if tab == "creations":
+        # Annotate count as 'num_likes' instead of 'likes'
+        qs = Idea.objects.all().annotate(num_likes=Count("likes"))
 
         if q:
             qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
@@ -56,20 +58,33 @@ def search_api(request):
 
         # Sorting logic
         if sort == "popular":
-            qs = qs.order_by("-like_count" if reverse else "like_count")
+            qs = qs.order_by("-num_likes" if reverse else "num_likes")
         elif sort == "title":
             qs = qs.order_by("-title" if reverse else "title")
         else:  # recent
             qs = qs.order_by("-created_at" if reverse else "created_at")
 
-        data = list(qs.values("title", "slug", "category", "description", "like_count")[:20])
+        data = list(
+            qs.values(
+                "id",
+                "slug",
+                "title",
+                "description",
+                "created_by",
+                "num_likes"
+            )[:20]
+        )
+
+        # Rename keys for frontend consistency
+        for item in data:
+            item["author"] = item.pop("author__username", "Unknown")
+            item["likes"] = item.pop("num_likes", 0)
 
     elif tab == "users":
         qs = User.objects.all()
         if q:
             qs = qs.filter(username__icontains=q)
 
-        # Sorting logic
         if sort == "name":
             qs = qs.order_by("-username" if reverse else "username")
         else:  # recent
@@ -84,7 +99,6 @@ def search_api(request):
 
         qs = qs.values("category").annotate(count=Count("id"))
 
-        # Sorting logic
         if sort == "alpha":
             qs = qs.order_by("-category" if reverse else "category")
         else:  # count
@@ -96,6 +110,7 @@ def search_api(request):
         data = []
 
     return JsonResponse(data, safe=False)
+
 # --------------------------
 # Basic Pages
 # --------------------------
@@ -118,7 +133,7 @@ def basetest_view(request):
 # --------------------------
 # Dashboard & Profile
 # --------------------------
-login_required
+@login_required(login_url='/login/')
 def dashboard_view(request):
     ideas = Idea.objects.filter(created_by=request.user)
     starred_ideas = request.user.starred_ideas.all()  # ManyToMany reverse
@@ -138,7 +153,7 @@ def dashboard_view(request):
     })
 
 @require_POST
-@login_required
+@login_required(login_url='/login/')
 def confirm_action(request):
     action = request.POST.get("action")
     idea_id = request.POST.get("idea_id")
@@ -169,7 +184,7 @@ def confirm_action(request):
 
     return JsonResponse({"error": "Invalid action."}, status=400)
 
-@login_required
+@login_required(login_url='/login/')
 def user_update(request):
     if request.method == "POST":
         form = UserUpdateForm(request.POST, instance=request.user)
@@ -178,7 +193,7 @@ def user_update(request):
         return redirect("dashboard")
     return redirect("dashboard")
 
-@login_required
+@login_required(login_url='/login/')
 def profile_view(request, username):
     user_obj = get_object_or_404(CustomUser, username=username)
 
@@ -203,7 +218,7 @@ def profile_view(request, username):
         "ideas": user_obj.ideas.all(),
     })
 
-@login_required
+@login_required(login_url='/login/')
 def toggle_follow(request, username):
     try:
         target = User.objects.get(username=username)
@@ -257,7 +272,7 @@ def login_view(request):
     return render(request, "auth/login.html", {"form": form, "next": next_url})
 
 
-@login_required
+@login_required(login_url='/login/')
 def logout_view(request):
     logout(request)
     return redirect("home")
@@ -266,7 +281,7 @@ def logout_view(request):
 # --------------------------
 # Idea CRUD + Like Toggle
 # --------------------------
-@login_required
+@login_required(login_url='/login/')
 def idea_detail(request, slug):
     idea = get_object_or_404(Idea, slug=slug)
     user_liked = Like.objects.filter(idea=idea, user=request.user).exists()
@@ -302,7 +317,7 @@ def idea_list(request):
     return render(request, "ideas/list.html", {"ideas": ideas})
 
 
-@login_required
+@login_required(login_url='/login/')
 def toggle_like(request, slug):
     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
         idea = get_object_or_404(Idea, slug=slug)
@@ -326,7 +341,7 @@ def toggle_star(request, slug):
         idea.starred_by.add(request.user)
     return redirect("idea-detail", slug=slug)
 
-@login_required
+@login_required(login_url='/login/')
 def idea_create(request):
     if request.method == "POST":
         form = IdeaForm(request.POST)
@@ -340,7 +355,7 @@ def idea_create(request):
     return render(request, "ideas/idea_form.html", {"form": form})
 
 
-@login_required
+@login_required(login_url='/login/')
 def idea_update(request, slug):
     idea = get_object_or_404(Idea, slug=slug, created_by=request.user)
     if request.method == "POST":
@@ -355,7 +370,7 @@ def idea_update(request, slug):
     return render(request, "ideas/idea_form.html", {"form": form})
 
 
-@login_required
+@login_required(login_url='/login/')
 def idea_delete(request, slug):
     idea = get_object_or_404(Idea, slug=slug, created_by=request.user)
     if request.method == "POST":
