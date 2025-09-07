@@ -70,7 +70,7 @@
 
   <div class="content-section">
     <div class="tab-content p-3 card-custom">
-
+      
       <!-- My Ideas -->
       <div class="tab-pane fade show active" id="ideas" role="tabpanel">
         <h1 style="text-align:center;">💡 My Ideas</h1>
@@ -146,139 +146,84 @@
         </a>
       </div>
 
-<!-- Profile -->
-  <div class="tab-pane fade" id="profile" role="tabpanel">
-    <h1 style="text-align:center;">👤 My Profile</h1>
-
-  <!-- Stats -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-3">
-      <div class="card-custom text-center">
-        <i class="bi bi-lightbulb-fill fs-3"></i>
-        <div><b>Total Ideas</b></div>
-        <div>{{ ideas|length }}</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card-custom text-center">
-        <i class="bi bi-star-fill fs-3"></i>
-        <div><b>Starred</b></div>
-        <div>{{ starred_ideas|length }}</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card-custom text-center">
-        <i class="bi bi-archive-fill fs-3"></i>
-        <div><b>Archived</b></div>
-        <div>{{ archived_ideas|length }}</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card-custom text-center">
-        <i class="bi bi-hand-thumbs-up-fill fs-3"></i>
-        <div><b>Total Likes</b></div>
-        <div>{{ total_likes }}</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Profile Info -->
-  <div class="card-custom profile mb-3">
-    <h2>Profile Information</h2>
-    <div class="info-item"><i class="bi bi-person-fill"></i> Username: {{ user.username }}</div>
-    <div class="info-item"><i class="bi bi-envelope-fill"></i> Email: {{ user.email }}</div>
-    <div class="info-item"><i class="bi bi-phone-fill"></i> Phone: {{ user.phone_number|default:"Not set" }}</div>
-    <div class="info-item"><i class="bi bi-calendar-fill"></i> Birth Date: {{ user.dob|date:"M d, Y"|default:"Not set" }}</div>
-  </div>
-
-  <!-- Followers & Following -->
-  <div class="card-custom profile mb-3">
-    <h2>Connections</h2>
-    <div class="row">
-      <div class="col-md-6">
-        <h4><i class="bi bi-person-check-fill"></i> Followers ({{ followers|length }})</h4>
-        {% if followers %}
-          <ul class="list-group">
-            {% for follower in followers %}
-              <li class="list-group-item d-flex align-items-center">
-                <i class="bi bi-person-circle me-2"></i>
-                <a href="{% url 'user-profile' follower.username %}">{{ follower.username }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p>No followers yet.</p>
-          {% endif %}
+      <!-- Profile -->
+      <div class="tab-pane fade" id="profile" role="tabpanel">
+        <h1 style="text-align:center;">👤 My Profile</h1>
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="card-custom text-center">
+              <i class="bi bi-lightbulb-fill fs-3"></i>
+              <div><b>Total Ideas</b></div>
+              <div>{{ ideas|length }}</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card-custom text-center">
+              <i class="bi bi-star-fill fs-3"></i>
+              <div><b>Starred</b></div>
+              <div>{{ starred_ideas|length }}</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card-custom text-center">
+              <i class="bi bi-archive-fill fs-3"></i>
+              <div><b>Archived</b></div>
+              <div>{{ archived_ideas|length }}</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card-custom text-center">
+              <i class="bi bi-hand-thumbs-up-fill fs-3"></i>
+              <div><b>Total Likes</b></div>
+              <div>{{ total_likes }}</div>
+            </div>
+          </div>
         </div>
-        <div class="col-md-6">
-          <h4><i class="bi bi-person-plus-fill"></i> Following ({{ following|length }})</h4>
-          {% if following %}
-            <ul class="list-group">
-              {% for followee in following %}
-                <li class="list-group-item d-flex align-items-center">
-                  <i class="bi bi-person-circle me-2"></i>
-                  <a href="{% url 'user-profile' followee.username %}">{{ followee.username }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p>Not following anyone.</p>
-          {% endif %}
+
+        <div class="card-custom profile">
+          <div class="info-item"><i class="bi bi-person-circle"></i><b>Username:</b> {{ request.user.username }}</div>
+          <div class="info-item"><i class="bi bi-envelope"></i><b>Email:</b> {{ request.user.email }}</div>
+          <div class="info-item"><i class="bi bi-calendar3"></i><b>Date Joined:</b> {{ request.user.date_joined|date:"M d, Y" }}</div>
+          <div class="info-item"><i class="bi bi-pen"></i><b>Last Updated:</b> {{ request.user.last_login|date:"M d, Y" }}</div>
+          
+        </div>
+
+        <button id="editProfileBtn" class="btn btn-outline-danger w-100">Edit Profile</button>
+
+        <div id="updateFormContainer" class="mt-4" style="display:none;">
+          <!-- Profile update form will be loaded here via JS if needed -->
         </div>
       </div>
-    </div>
 
-    <!-- Add this button above the form -->
-<button id="editProfileBtn" class="btn btn-primary mb-3">Edit Profile</button>
-
-<!-- Wrap the form container in a div with style to hide initially -->
-<div id="updateFormContainer" style="display: none;">
-  <h3>Update Profile</h3>
-  <form method="post" action="{% url 'dashboard' %}" novalidate>
-    {% csrf_token %}
-    {{ profile_update_form.as_p }}
-    <button type="submit" class="btn btn-success">Save Changes</button>
-    <button type="button" id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
-  </form>
-</div>
-
-
-      <!-- Theme Customization -->
+      <!-- Customize Theme -->
       <div class="tab-pane fade" id="theme" role="tabpanel">
         <h1 style="text-align:center;">🎨 Customize Theme</h1>
-        <label for="themeSelect" class="form-label">Choose your preferred color theme:</label>
-        <select id="themeSelect" class="form-select w-50 mx-auto">
-          <option value="theme-yellow">Yellow</option>
-          <option value="theme-blue">Blue</option>
-          <option value="theme-green">Green</option>
-          <option value="theme-pink">Pink</option>
-          <option value="theme-purple">Purple</option>
-          <option value="theme-orange">Orange</option>
-          <option value="theme-danger">Danger (Red)</option>
-        </select>
+        <div class="card-custom text-center mt-4">
+          <label for="themeSelect"><b>Choose your theme:</b></label>
+          <select id="themeSelect" class="form-select w-auto mx-auto">
+            <option value="theme-yellow">Yellow</option>
+            <option value="theme-blue">Blue</option>
+            <option value="theme-green">Green</option>
+            <option value="theme-pink">Pink</option>
+            <option value="theme-purple">Purple</option>
+            <option value="theme-orange">Orange</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Modal for delete/archive/unarchive confirmation -->
-<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form id="confirmActionForm" method="post" class="modal-content" novalidate>
+    <form id="confirmActionForm" method="post" class="modal-content">
       {% csrf_token %}
       <div class="modal-header">
         <h5 class="modal-title" id="actionModalLabel">Confirm Action</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <p id="actionModalMessage"></p>
-        <div class="mb-3">
-          <label for="confirmPassword" class="form-label">Enter your password to confirm:</label>
-          <input type="password" id="confirmPassword" name="password" class="form-control" required minlength="6" aria-describedby="passwordHelp" autocomplete="current-password">
-          <div id="passwordHelp" class="form-text">Your password is required to perform this action.</div>
-          <div id="modalError" class="text-danger mt-2"></div>
-        </div>
-      </div>
+      <div class="modal-body" id="actionModalBody"></div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -286,126 +231,123 @@
     </form>
   </div>
 </div>
-{% endblock %}
 
+
+{% endblock %}
 {% block extra_scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("dashboardContainer");
   const themeSelect = document.getElementById("themeSelect");
 
-  // Load saved theme or default
+  // Load theme from localStorage, default to 'theme-yellow'
   const savedTheme = localStorage.getItem("dashboardTheme") || "theme-yellow";
+
+  // Apply the saved theme immediately
   container.classList.add(savedTheme);
   themeSelect.value = savedTheme;
 
-  // Change theme and save
   themeSelect.addEventListener("change", () => {
     const newTheme = themeSelect.value;
+
+    // Remove any existing theme class (those starting with 'theme-')
     container.classList.forEach(cls => {
       if (cls.startsWith("theme-")) container.classList.remove(cls);
     });
+
+    themeSelect.addEventListener("change", () => {
+  const newTheme = themeSelect.value;
+
+  // Remove any existing theme class (those starting with 'theme-')
+  container.classList.forEach(cls => {
+    if (cls.startsWith("theme-")) container.classList.remove(cls);
+  });
+
+  // Add the newly selected theme class
+  container.classList.add(newTheme);
+
+  // Save it in localStorage to persist across reloads
+  localStorage.setItem("dashboardTheme", newTheme);
+
+  // Auto-refresh the page to apply theme server-side if needed
+  location.reload();
+});
+
+
+    // Add the newly selected theme class
     container.classList.add(newTheme);
+
+    // Save it in localStorage to persist across reloads
     localStorage.setItem("dashboardTheme", newTheme);
   });
 
-  // Modal elements
-  const actionModalEl = document.getElementById('actionModal');
-  const actionModal = new bootstrap.Modal(actionModalEl);
+  // Action modal logic (delete/archive/unarchive)
+  const actionModal = new bootstrap.Modal(document.getElementById('actionModal'));
   const confirmActionForm = document.getElementById('confirmActionForm');
-  const actionModalMessage = document.getElementById('actionModalMessage');
+  const actionModalBody = document.getElementById('actionModalBody');
   const confirmActionBtn = document.getElementById('confirmActionBtn');
-  const modalError = document.getElementById('modalError');
-  const confirmPasswordInput = document.getElementById('confirmPassword');
 
-  let currentAction = null;
-  let currentIdeaId = null;
+  let currentAction = null, currentIdeaId = null;
 
-  // Open modal on action buttons
   document.querySelectorAll(".open-action-modal").forEach(btn => {
     btn.addEventListener("click", (e) => {
       currentAction = e.currentTarget.dataset.action;
       currentIdeaId = e.currentTarget.dataset.id;
-      modalError.textContent = '';
-      confirmPasswordInput.value = '';
 
-      // Style confirm button depending on action
+      let msg = "";
       confirmActionBtn.classList.toggle("btn-danger", currentAction === "delete");
       confirmActionBtn.classList.toggle("btn-warning", currentAction !== "delete");
 
-      if (currentAction === "delete") {
-        actionModalMessage.innerHTML = "Are you sure you want to <b>delete</b> this idea?";
-      } else if (currentAction === "archive") {
-        actionModalMessage.innerHTML = "Are you sure you want to <b>archive</b> this idea?";
-      } else if (currentAction === "unarchive") {
-        actionModalMessage.innerHTML = "Are you sure you want to <b>unarchive</b> this idea?";
-      } else {
-        actionModalMessage.textContent = "Please confirm your action.";
-      }
+      if (currentAction === "delete") msg = "Are you sure you want to <b>delete</b> this idea?";
+      else if (currentAction === "archive") msg = "Are you sure you want to <b>archive</b> this idea?";
+      else if (currentAction === "unarchive") msg = "Are you sure you want to <b>unarchive</b> this idea?";
+      else msg = "Confirm your action.";
+
+      actionModalBody.innerHTML = msg;
+
+      // Add confirmation button directly into the modal body
+      actionModalBody.innerHTML += `
+        <div class="mt-3">
+        </div>
+      `;
 
       actionModal.show();
     });
   });
 
-  // Submit modal form
   confirmActionForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    modalError.textContent = '';
-    const password = confirmPasswordInput.value.trim();
-
-    if (!password || password.length < 6) {
-      modalError.textContent = 'Please enter a valid password (at least 6 characters).';
-      return;
-    }
-
     confirmActionBtn.disabled = true;
     confirmActionBtn.textContent = "Processing...";
 
     try {
-      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
       const response = await fetch("{% url 'idea_action' %}", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
+          "X-CSRFToken": "{{ csrf_token }}",
         },
         body: JSON.stringify({
           action: currentAction,
-          idea_id: currentIdeaId,
-          password: password
+          idea_id: currentIdeaId
         }),
       });
 
       if (response.ok) {
-        location.reload();
+        location.reload(); // Refresh the page if the action was successful
       } else {
         const errorData = await response.json();
-        modalError.textContent = errorData.error || "An error occurred. Please try again.";
+        alert(`Error: ${errorData.error || 'An error occurred.'}`);
       }
-    } catch (error) {
-      modalError.textContent = "Network error. Please try again.";
+    } catch {
+      alert("Network error. Please try again.");
     } finally {
       confirmActionBtn.disabled = false;
       confirmActionBtn.textContent = "Confirm";
+      actionModal.hide();
     }
   });
-
-  // Profile update form toggle logic
-  const editBtn = document.getElementById('editProfileBtn');
-  const cancelBtn = document.getElementById('cancelEditBtn');
-  const formContainer = document.getElementById('updateFormContainer');
-
-  editBtn.addEventListener('click', () => {
-    formContainer.style.display = 'block';
-    editBtn.style.display = 'none';
-  });
-
-  cancelBtn.addEventListener('click', () => {
-    formContainer.style.display = 'none';
-    editBtn.style.display = 'inline-block';
-  });
-
 });
+
 </script>
 {% endblock %}

@@ -134,7 +134,8 @@ class Idea(models.Model):
 
     def is_starred_by(self, user):
         return self.starred_by.filter(id=user.id).exists()
-    
+
+
 # -------------------------
 # Like Model
 # -------------------------
@@ -146,6 +147,7 @@ class Like(models.Model):
     class Meta:
         unique_together = ("idea", "user")
 
+
 # -------------------------
 # Comment Model
 # -------------------------
@@ -155,6 +157,10 @@ class Comment(models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+# -------------------------
+# Contact Message Model
+# -------------------------
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -164,3 +170,77 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f'Contact message from {self.name}'
+
+
+# -------------------------
+# Messaging Models
+# -------------------------
+class Conversation(models.Model):
+    user1 = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="conversations_as_user1"
+    )
+    user2 = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="conversations_as_user2"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "conversation"
+        unique_together = (("user1", "user2"),)
+
+    def save(self, *args, **kwargs):
+        if self.user1.id > self.user2.id:
+            self.user1, self.user2 = self.user2, self.user1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Conversation between {self.user1.username} and {self.user2.username}"
+
+class Message(models.Model):
+    conversation = models.ForeignKey(
+        Conversation, on_delete=models.CASCADE, related_name="messages"
+    )
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    text = models.TextField(blank=True)
+    attachment = models.FileField(upload_to="message_attachments/", blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    is_reported = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["timestamp"]
+
+    def __str__(self):
+        return f"Message from {self.sender.username} at {self.timestamp}"
+
+    def mark_as_read(self):
+        self.is_read = True
+        self.save()
+
+    def reply(self, user, text):
+        if self.sender == user:
+            return None
+        return Message.objects.create(
+            conversation=self.conversation,
+            sender=user,
+            text=text
+        )
+
+class MessageReaction(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reactions")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    emoji = models.CharField(max_length=10)
+    reacted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("message", "user", "emoji")
+
+
+class MessageReport(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reports")
+    reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    reason = models.TextField(blank=True)
+    reported_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report by {self.reported_by} on message {self.message.id}"

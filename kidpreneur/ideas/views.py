@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, get_user_model, authenticate
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from .forms import MessageForm, MessageReportForm
+from .models import Conversation, Message, MessageReport
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.template.loader import render_to_string
@@ -31,7 +32,6 @@ def signup_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, "auth/signup.html", {"form": form, "next": next_url})
-
 
 def login_view(request):
     next_url = request.GET.get("next") or request.POST.get("next")
@@ -187,26 +187,88 @@ def contact_view(request):
 @login_required(login_url='/login/')
 def dashboard_view(request):
     user = request.user
-    print((user))
+
+    # Ideas
     ideas = Idea.objects.filter(created_by=user, is_archived=False)
     starred_ideas = user.starred_ideas.filter(is_archived=False)
     archived_ideas = Idea.objects.filter(created_by=user, is_archived=True)
-
     total_likes = sum(idea.likes.count() for idea in ideas)
 
-    # Get followers and following
+    # Followers & Following
     followers = [f.follower for f in user.followers.select_related('follower').all()]
     following = [f.following for f in user.following.select_related('following').all()]
 
+    # Theme colors for UI
     theme_colors = ["yellow", "blue", "green", "pink", "purple", "orange", "danger"]
 
-    if request.method == 'POST':
-        form = UserUpdateForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard')  # or use your dashboard URL name
-    else:
-        form = UserUpdateForm(instance=user)
+    # Conversations
+    conversations = Conversation.objects.filter(user1=user) | Conversation.objects.filter(user2=user)
+    conversations = conversations.distinct()
+
+    # Messages per conversation
+    conversation_messages = {
+        convo.id: convo.messages.select_related('sender').order_by('timestamp')
+        for convo in conversations
+    }
+
+    # Unread counts
+    unread_counts = {
+        convo.id: convo.messages.filter(is_read=False).exclude(sender=user).count()
+        for convo in conversations
+    }
+
+    # Mark messages as read
+    for convo in conversations:
+        convo.messages.filter(is_read=False).exclude(sender=user).update(is_read=True)
+
+    # Forms
+    profile_update_form = UserUpdateForm(instance=user)
+    message_form = MessageForm()
+    report_form = MessageReportForm()
+
+    # Handle profile update
+    if request.method == 'POST' and 'profile_update_form' in request.POST:
+        profile_update_form = UserUpdateForm(request.POST, instance=user)
+        if profile_update_form.is_valid():
+            profile_update_form.save()
+            messages.success(request, 'Your profile has been updated!')
+            return redirect('dashboard')
+
+    # Handle sending a message
+    if request.method == 'POST' and 'send_message_form' in request.POST:
+        conversation_id = request.POST.get('conversation_id')
+        conversation = get_object_or_404(Conversation, id=conversation_id)
+
+        if user not in [conversation.user1, conversation.user2]:
+            return redirect('dashboard')
+
+        message_form = MessageForm(request.POST, request.FILES)
+        if message_form.is_valid():
+            message = message_form.save(commit=False)
+            message.sender = user
+            message.conversation = conversation
+            message.save()
+            messages.success(request, 'Your message has been sent!')
+            return redirect('dashboard')
+
+    # Handle reporting a message
+    if request.method == 'POST' and 'report_message_form' in request.POST:
+        message_id = request.POST.get('message_id')
+        message = get_object_or_404(Message, id=message_id)
+
+        if user == message.sender:
+            return redirect('dashboard')
+
+        report_form = MessageReportForm(request.POST)
+        if report_form.is_valid():
+            report = report_form.save(commit=False)
+            report.message = message
+            report.reported_by = user
+            report.save()
+            message.is_reported = True
+            message.save()
+            messages.success(request, 'Your report has been submitted!')
+            return redirect('dashboard')
 
     context = {
         'ideas': ideas,
@@ -216,11 +278,19 @@ def dashboard_view(request):
         'theme_colors': theme_colors,
         'followers': followers,
         'following': following,
-        'profile_update_form': form,  # pass form here
+        'profile_update_form': profile_update_form,
+        'message_form': message_form,
+        'report_form': report_form,
+        'conversations': conversations,
+        'conversation_messages': conversation_messages,
+        'unread_counts': unread_counts,
     }
 
-    return render(request, 'dashboard.html', context)   
+    return render(request, 'dashboard.html', context)
 
+# -------------------------
+# Themes
+# -------------------------
 @login_required(login_url='/login/')
 @csrf_exempt
 def save_user_theme(request):
