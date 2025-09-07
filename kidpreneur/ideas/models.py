@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils.text import slugify
 
+
 # -------------------------
 # Custom User
 # -------------------------
@@ -12,6 +13,7 @@ class CustomUser(AbstractUser):
     is_student = models.BooleanField(default=False)
     school_name = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
 
     @property
     def age(self):
@@ -23,8 +25,24 @@ class CustomUser(AbstractUser):
             )
         return None
 
+    @property
+    def followers_list(self):
+        return self.followers.all()
+
+    @property
+    def following_list(self):
+        return self.following.all()
+
+    @property
+    def followers_count(self):
+        return self.followers.count()
+
+    @property
+    def following_count(self):
+        return self.following.count()
+
     def __str__(self):
-        return self.username    
+        return self.username
 
 
 # -------------------------
@@ -72,7 +90,7 @@ class Idea(models.Model):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="ideas",       
+        related_name="ideas",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -82,8 +100,10 @@ class Idea(models.Model):
         blank=True,
     )
 
-    # NEW: archive flag
     is_archived = models.BooleanField(default=False)
+
+    image = models.ImageField(upload_to="idea_images/", blank=True, null=True)
+    document = models.FileField(upload_to="idea_documents/", blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -114,8 +134,7 @@ class Idea(models.Model):
 
     def is_starred_by(self, user):
         return self.starred_by.filter(id=user.id).exists()
-
-
+    
 # -------------------------
 # Like Model
 # -------------------------
@@ -127,7 +146,6 @@ class Like(models.Model):
     class Meta:
         unique_together = ("idea", "user")
 
-
 # -------------------------
 # Comment Model
 # -------------------------
@@ -136,3 +154,13 @@ class Comment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Contact message from {self.name}'

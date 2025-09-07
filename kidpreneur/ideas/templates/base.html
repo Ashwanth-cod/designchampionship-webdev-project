@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 <html lang="en">
+{% load widget_tweaks %}
 <head>
     {% load static %}
     <meta charset="UTF-8">  
@@ -13,6 +13,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=TASA+Orbiter:wght@400..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
+
  <style>
         /* --------------------
            General
@@ -137,13 +139,20 @@
         /* --------------------
            Themes
         -------------------- */
-        body.theme-danger   { --theme-bg: #dc3545; --theme-grad: linear-gradient(90deg, #ff6b6b, #ff1e56); }
         body.theme-blue     { --theme-bg: #0d6efd; --theme-grad: linear-gradient(90deg, #2575fc, #6a11cb); }
         body.theme-green    { --theme-bg: #198754; --theme-grad: linear-gradient(90deg, #38ef7d, #11998e); }
         body.theme-yellow   { --theme-bg: #ffc107; --theme-grad: linear-gradient(90deg, #f7971e, #ffd200); }
         body.theme-purple   { --theme-bg: #6f42c1; --theme-grad: linear-gradient(90deg, #a18cd1, #fbc2eb); }
         body.theme-pink     { --theme-bg: #e83e8c; --theme-grad: linear-gradient(90deg, #ff758c, #ff7eb3); }
         body.theme-orange   { --theme-bg: #fd7e14; --theme-grad: linear-gradient(90deg, #ff9966, #ff5e62); }
+
+        .parisienne-regular {
+        font-family: "Parisienne", cursive;
+        font-weight: 1000;
+        font-size:32px;
+        font-style: normal;
+        }
+
 
         /* Apply theme vars */
         .navbar, .card-header { background: var(--theme-grad) !important; }
@@ -175,7 +184,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">NeoHive</a>
+            <a class="navbar-brand parisienne-regular" href="{% url 'home' %}">NeoHive</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

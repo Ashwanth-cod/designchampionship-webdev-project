@@ -33,7 +33,6 @@
     transition: all 0.25s ease-in-out;
   }
 
-  /* Star styles */
   .star-btn {
     background-color: #f8f9fa;
     border: 2px solid #ffc107;
@@ -53,65 +52,115 @@
   }
 
   .idea-description {
-    white-space: pre-line; /* ✅ preserve line breaks */
+    white-space: pre-line;
+  }
+
+  /* Modal Image & Doc Styles */
+  .modal-content img, .modal-content iframe {
+    width: 100%;
+    height: auto;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
 </style>
 
+<!-- MAIN CONTENT -->
 <div class="idea-container">
-  <!-- Left side -->
+  <!-- LEFT SIDE -->
   <div>
     <div class="card-custom description">
       <h2>{{ idea.title }}</h2>
       <p class="idea-description">{{ idea.description }}</p>
+
+      {% if idea.image or idea.document %}
+      <div id="ideaCarousel" class="carousel slide mt-4" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          {% if idea.image %}
+          <div class="carousel-item active">
+            <img src="{{ idea.image.url }}" class="d-block w-100"
+              style="max-height: 500px; object-fit: cover; border-radius: 12px; cursor: pointer;"
+              data-bs-toggle="modal" data-bs-target="#mediaModal"
+              data-type="image" data-src="{{ idea.image.url }}">
+          </div>
+          {% endif %}
+
+          {% if idea.document %}
+          <div class="carousel-item {% if not idea.image %}active{% endif %}">
+            <div class="d-flex justify-content-center align-items-center"
+              style="height: 300px; background: #f8f9fa; cursor: pointer;"
+              data-bs-toggle="modal" data-bs-target="#mediaModal"
+              data-type="document"
+              data-src="{{ idea.document.url }}"
+              data-extension="{{ idea.document.url|lower|slice:'-4:' }}">
+              <div class="text-center">
+                <i class="bi bi-file-earmark-text" style="font-size: 4rem;"></i><br>
+                <strong>{{ idea.document.name|cut:"idea_documents/" }}</strong>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if idea.image and idea.document %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#ideaCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#ideaCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
+
     <br><br>
+
     <div class="card-custom author">
       <p>
         By <strong>
           {% if idea.created_by == request.user %}
-            <a href="{% url 'dashboard' %}" style="text-decoration:none;">
-              {{ idea.created_by.username }}
-            </a>
+          <a href="{% url 'dashboard' %}" style="text-decoration:none;">
+            {{ idea.created_by.username }}
+          </a>
           {% else %}
-            <a href="{% url 'user-profile' idea.created_by.username %}" style="text-decoration:none;">
-              {{ idea.created_by.username }}
-            </a>
+          <a href="{% url 'user-profile' idea.created_by.username %}" style="text-decoration:none;">
+            {{ idea.created_by.username }}
+          </a>
           {% endif %}
-        </strong>
-        <br>
+        </strong><br>
         <small>{{ idea.created_at|date:"M d, Y" }}</small>
       </p>
     </div>
   </div>
 
-  <!-- Right side -->
+  <!-- RIGHT SIDE -->
   <div>
     <div class="card-custom likes mb-3">
-      <!-- Like (server-side) -->
       <form method="post">
         {% csrf_token %}
         <button name="like_toggle" value="1" 
           class="btn {% if user_liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
           {% if user_liked %}💔 Unlike{% else %}❤️ Like{% endif %}
-          {{ like_count }} <!-- ✅ show correct like count -->
+          {{ like_count }}
         </button>
       </form>
 
-      <!-- Star (server-side) -->
-        <form method="post" action="{% url 'toggle_star' idea.slug %}">
-          {% csrf_token %}
-          <button type="submit" 
-            class="star-btn {% if request.user in idea.starred_by.all %}starred{% endif %}">
-            {% if request.user in idea.starred_by.all %}
-              ⭐ Unstar this idea
-            {% else %}
-              ⭐ Star this idea
-            {% endif %}
-          </button>
-        </form>
+      <form method="post" action="{% url 'toggle_star' idea.slug %}">
+        {% csrf_token %}
+        <button type="submit" 
+          class="star-btn {% if request.user in idea.starred_by.all %}starred{% endif %}">
+          {% if request.user in idea.starred_by.all %}
+            ⭐ Unstar this idea
+          {% else %}
+            ⭐ Star this idea
+          {% endif %}
+        </button>
+      </form>
 
-
-      <!-- Report -->
       <form method="post" class="report">
         {% csrf_token %}
         <button name="report_toggle" value="1" class="btn btn-warning">
@@ -120,7 +169,6 @@
       </form>
     </div>
 
-    <!-- Comments -->
     <div class="card-custom comments">
       <h4>Comments</h4>
       <form method="post" class="mb-3">
@@ -129,49 +177,78 @@
         <button type="submit" class="btn btn-success">Submit</button>
       </form>
       {% for comment in comments %}
-        <div class="comment-item">   
-          <strong>
-            {% if comment.user == request.user %}
-              <a href="{% url 'dashboard' %}" style="text-decoration:none;">
-                {{ comment.user.username }}
-              </a>
-            {% else %}
-              <a href="{% url 'user-profile' comment.user.username %}" style="text-decoration:none;">
-                {{ comment.user.username }}
-              </a>
-            {% endif %}
-          </strong>
-          <small class="text-muted"> • {{ comment.created_at|naturaltime }}</small>
-          <p class="mb-0">{{ comment.text }}</p>
-        </div>
+      <div class="comment-item">   
+        <strong>
+          {% if comment.user == request.user %}
+          <a href="{% url 'dashboard' %}" style="text-decoration:none;">
+            {{ comment.user.username }}
+          </a>
+          {% else %}
+          <a href="{% url 'user-profile' comment.user.username %}" style="text-decoration:none;">
+            {{ comment.user.username }}
+          </a>
+          {% endif %}
+        </strong>
+        <small class="text-muted"> • {{ comment.created_at|naturaltime }}</small>
+        <p class="mb-0">{{ comment.text }}</p>
+      </div>
       {% empty %}
-        <p class="text-muted">No comments yet.</p>  
+      <p class="text-muted">No comments yet.</p>  
       {% endfor %}
     </div>
   </div>
 </div>
 
+<!-- MODAL FOR IMAGE & DOCUMENT -->
+<div class="modal fade" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-body" id="modalBodyContent" style="text-align:center;">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOTSTRAP ICONS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<!-- BOOTSTRAP JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- MODAL SCRIPT -->
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    const starBtn = document.getElementById("starBtn");
-    const storageKey = "starred_{{ idea.id }}";
+    const modalBody = document.getElementById("modalBodyContent");
+    const mediaItems = document.querySelectorAll("[data-bs-toggle='modal'][data-bs-target='#mediaModal']");
 
-    // Load state
-    if (localStorage.getItem(storageKey) === "true") {
-      starBtn.classList.add("starred");
-      starBtn.innerText = "⭐ Unstar this idea";
-    }
+    mediaItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const type = item.getAttribute("data-type");
+        const src = item.getAttribute("data-src");
+        const extension = (item.getAttribute("data-extension") || "").toLowerCase();
 
-    // Toggle star
-    starBtn.addEventListener("click", function() {
-      const isStarred = starBtn.classList.toggle("starred");
-      if (isStarred) {
-        starBtn.innerText = "⭐ Unstar this idea";
-        localStorage.setItem(storageKey, "true");
-      } else {
-        starBtn.innerText = "⭐ Star this idea";
-        localStorage.removeItem(storageKey);
-      }
+        if (type === "image") {
+          modalBody.innerHTML = `<img src="${src}" alt="Full Image" style="max-width: 100%; max-height: 90vh; border-radius: 10px;">`;
+        } else if (type === "document") {
+          if (extension === ".pdf") {
+            modalBody.innerHTML = `<iframe src="${src}" style="width: 100%; height: 80vh;" frameborder="0"></iframe>`;
+          } else if (extension === ".txt") {
+            fetch(src)
+              .then(res => res.text())
+              .then(text => {
+                modalBody.innerHTML = `<pre style="text-align:left; max-height: 80vh; overflow-y:auto;">${text}</pre>`;
+              });
+          } else if (extension === ".docx" || extension === ".doc") {
+            modalBody.innerHTML = `
+              <a href="${src}" target="_blank" class="btn btn-primary mb-3">Open Document in New Tab</a>
+              <p><em>Preview not supported for DOC/DOCX files directly. Use the button above.</em></p>
+            `;
+          } else {
+            modalBody.innerHTML = `<p>Unsupported document format.</p>`;
+          }
+        }
+      });
     });
   });
 </script>

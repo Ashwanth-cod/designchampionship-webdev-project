@@ -1,5 +1,230 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}About - KidPrenuer{% endblock %}
 
-{% block title %}About - Kidprenuer{% endblock %}
+{% block content %}
+<!-- Internal CSS for About Us Page -->
+<style>
+    /* Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
+
+    #about-us {
+        background-color: #f4f4f4;
+        padding-top: 50px;
+        padding-bottom: 50px;
+    }
+
+    /* Header Section */
+    #about-us h1, #about-us h2 {
+        margin-bottom: 20px;
+        font-family: 'Playfair Display', serif;
+        font-weight: 700; /* Bold header */
+    }
+
+    #about-us p {
+        margin-bottom: 25px;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 400; /* Regular body text */
+    }
+
+    .container {
+        max-width: 1140px; /* Controls the width on larger screens */
+    }
+
+    /* Custom Card Styles */
+    .custom-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .custom-card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        transform: translateY(-5px);
+    }
+
+    .custom-card .card-header {
+        background-color: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600; /* Medium weight for the card header */
+        font-size: 1.25rem;
+    }
+
+    .custom-card-body p {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 400; /* Regular text for card body */
+        color: #555;
+    }
+
+    /* Icon Section Styling */
+    .custom-card .icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: #f8a019;
+    }
+
+    /* Card Animations */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Spacing for the Row of Cards */
+    .row.mt-5 {
+        margin-top: 50px;
+    }
+
+    /* Button Styles */
+    .btn-confirm {
+        background-color: #f8a019;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600; /* Medium weight for the button text */
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-confirm:hover {
+        background-color: #e87a1f;
+    }
+</style>
+
+<!-- About Us Section -->
+<section id="about-us" class="py-5 bg-light">
+    <div class="container">
+
+        <!-- About Us Header -->
+        <div class="row text-center fade-in">
+            <div class="col">
+                <h1 class="display-4">Welcome to NeoHive!</h1>
+                <p class="lead">Where young entrepreneurs get their start!</p>
+            </div>
+        </div>
+
+        <!-- Mission Section -->
+        <div class="row mt-5 fade-in">
+            <div class="col-md-4">
+                <div class="custom-card">
+                    <div class="card-header text-center">
+                        <span class="icon">🚀</span>
+                        <h3>Our Mission</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Our mission is simple: to spark imagination, build confidence, and give every kid a platform to share their business ideas, inventions, and prototypes. We want to make entrepreneurship fun, accessible, and full of possibility.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What We Do Section -->
+            <div class="col-md-4">
+                <div class="custom-card">
+                    <div class="card-header text-center">
+                        <span class="icon">🧠</span>
+                        <h3>What We Do</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Let kids submit their ideas and get valuable feedback.</li>
+                            <li>Showcase prototypes and projects in our Playground.</li>
+                            <li>Encourage collaboration and learning among young creators.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Why It Matters Section -->
+            <div class="col-md-4">
+                <div class="custom-card">
+                    <div class="card-header text-center">
+                        <span class="icon">💬</span>
+                        <h3>Why It Matters</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Entrepreneurship teaches problem-solving, communication, and resilience. But most of all—it teaches kids that their voice matters. At NeoHive, we are building a community where ideas are celebrated, not judged. Where mistakes are part of the journey. And where every kid gets to say: “I built that.”</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Who’s Behind This Section -->
+        <div class="row mt-5 fade-in">
+            <div class="col-md-12">
+                <div class="custom-card">
+                    <div class="card-header text-center">
+                        <span class="icon">👩‍🚀</span>
+                        <h3>Who’s Behind This</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>NeoHive was created by a team of passionate individuals who believe in the power of young minds—including educators, designers, and dreamers. We are here to guide, cheer, and learn from the next generation of changemakers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Programs Section -->
+        <div class="row mt-5 fade-in">
+            <div class="col-md-12 text-center">
+                <h2>💡 Featured Programs</h2>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <!-- Program Card 1 -->
+            <div class="col-md-4">
+                <div class="custom-card">
+                    <div class="card-header text-center">
+                        <span class="icon">💡</span>
+                        <h3>Creative Minds Workshop</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>A hands-on program where kids can turn their ideas into tangible projects. Learn how to prototype and develop your own product!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Program Card 2 -->
+            <div class="col-md-4">
+                <div class="custom-card">
+                    <div class="card-header text-center">
+                        <span class="icon">🎤</span>
+                        <h3>Pitch Perfect</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Join our Pitch Perfect program to learn how to present your ideas confidently to investors, mentors, and peers!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Program Card 3 -->
+            <div class="col-md-4">
+                <div class="custom-card">
+                    <div class="card-header text-center">
+                        <span class="icon">🚀</span>
+                        <h3>The Startup Lab</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Work in teams to create your own mini-startup. From idea to execution, we’ll help you bring your entrepreneurial dreams to life.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

@@ -1,13 +1,276 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}NeoHive Kids{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+  :root {
+    --radius: 0.5rem;
+    --shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    --theme-start: #2196f3;
+    --theme-end: #90caf9;
+  }
+
+  /* ---- Animation Overlay Styles ---- */
+  #animationOverlay {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 1050; /* Above everything */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Rockets */
+  .rocket {
+    position: absolute;
+    width: 60px;
+    opacity: 0;
+    transition: all 0.8s ease-out;
+  }
+
+  .rocket-top   { top: -100px; left: 50%; transform: translateX(-50%); }
+  .rocket-left  { left: -100px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+  .rocket-right { right: -100px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+
+  /* Rockets moving to center */
+  #animationOverlay.hero-animate .rocket-top   { top: 35%; opacity: 1; transform: translate(-50%, 0); }
+  #animationOverlay.hero-animate .rocket-left  { left: 35%; opacity: 1; transform: translateY(-50%) rotate(-90deg); }
+  #animationOverlay.hero-animate .rocket-right { right: 35%; opacity: 1; transform: translateY(-50%) rotate(90deg); }
+
+  /* Texts hidden initially */
+  .hero-text {
+    opacity: 0;
+    font-weight: 800;
+    font-size: 3rem;
+    transition: opacity 0.5s ease-in;
+    position: relative;
+    margin-top: 3rem;
+    color: #2196f3;
+    user-select: none;
+  }
+
+  /* Reveal one by one */
+  #animationOverlay.hero-animate .hero-text.create  { transition-delay: 1.6s; opacity: 1; }
+  #animationOverlay.hero-animate .hero-text.think   { transition-delay: 1.2s; opacity: 1; }
+  #animationOverlay.hero-animate .hero-text.launch  { transition-delay: 2.0s; opacity: 1; }
+
+  /* Hide rockets when text appears */
+  #animationOverlay.hero-animate .rocket-top,
+  #animationOverlay.hero-animate .rocket-left,
+  #animationOverlay.hero-animate .rocket-right {
+    transition-delay: 1.1s;
+  }
+  #animationOverlay.hero-animate .rocket-top {
+    opacity: 0;
+  }
+  #animationOverlay.hero-animate .rocket-left {
+    opacity: 0;
+  }
+  #animationOverlay.hero-animate .rocket-right {
+    opacity: 0;
+  }
+
+  /* Fade out the entire overlay */
+  #animationOverlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+  }
+
+  /* -------- Normal Hero Section styles -------- */
+  .hero-gradient {
+    border-radius: var(--radius);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: white;
+    background: linear-gradient(135deg, var(--theme-start), var(--theme-end));
+    box-shadow: var(--shadow);
+    transition: background 0.3s ease;
+    margin-bottom: 3rem;
+  }
+
+  /* Carousel spacing */
+  .carousel-wrapper {
+    margin-top: 0; /* Remove if it's pushing too far */
+    padding-top: 2rem;
+  }
+
+  /* Theme colors (optional) */
+  .theme-red   .hero-gradient { --theme-start: #ff1744; --theme-end: #ff8a80; }
+  .theme-yellow .hero-gradient { --theme-start: #ffc107; --theme-end: #fff176; color: black; }
+  .theme-blue  .hero-gradient { --theme-start: #2196f3; --theme-end: #90caf9; }
+  .theme-green .hero-gradient { --theme-start: #00c853; --theme-end: #69f0ae; }
+  .theme-pink  .hero-gradient { --theme-start: #e91e63; --theme-end: #f48fb1; }
+  .theme-purple .hero-gradient { --theme-start: #9c27b0; --theme-end: #ce93d8; }
+  .theme-orange .hero-gradient { --theme-start: #ff7043; --theme-end: #ffab91; }
+
+  /* Button spacing */
+  .hero-gradient .btn {
+    margin-top: 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .rocket { width: 40px; }
+    .rocket-left { left: -80px; }
+    .rocket-right { right: -80px; }
+    .hero-text { font-size: 2rem; }
+  }
+
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="text-center my-5 py-5" style="background: linear-gradient(135deg, #ffcb05, #ff6b6b); border-radius: 20px; color: #1e1f28;">
-    <img src="{% static 'images/rocket.png' %}" alt="Rocket" style="width:80px; margin-bottom:20px;">
-    <h1 class="display-4 fw-bold">Think. Create. Launch!</h1>
-    <p class="lead mt-3">A playful space for kids to share their amazing startup ideas, learn, and grow together.</p>
-    <a href="{% url 'dashboard' %}" class="btn btn-dark btn-lg mt-4">🚀 Get Started</a><a href="{% url 'search' %}" style="margin-left:30px" class="btn btn-dark btn-lg mt-4">🚀 Explore Ideas</a>
+<!-- Animation Overlay -->
+<div id="animationOverlay" aria-hidden="true" role="presentation" aria-label="Intro animation">
+  <img src="{% static 'images/rocket.png' %}" alt="Rocket Top" class="rocket rocket-top" loading="lazy" aria-hidden="true">
+  <img src="{% static 'images/rocket.png' %}" alt="Rocket Left" class="rocket rocket-left" loading="lazy" aria-hidden="true">
+  <img src="{% static 'images/rocket.png' %}" alt="Rocket Right" class="rocket rocket-right" loading="lazy" aria-hidden="true">
+  
+  <div class="hero-text think" aria-hidden="true">Think.</div>     <!-- Left rocket -->
+  <div class="hero-text create" aria-hidden="true">Create.</div>   <!-- Top rocket -->
+  <div class="hero-text launch" aria-hidden="true">Launch!</div>  <!-- Right rocket -->
 </div>
+
+<!-- Normal Dashboard Content -->
+<div class="dashboard-container" style="visibility: hidden;" id="dashboardContent">
+
+  <!-- Hero Section -->
+  <section class="hero-gradient">
+    <img src="{% static 'images/rocket.png' %}" alt="Rocket" width="80" class="mb-3" loading="lazy">
+    <h1 class="fw-bold display-5">Think. Create. Launch! 🚀</h1>
+    <p class="fs-5 mt-2">A space where kids share startup ideas and grow big dreams!</p>
+    <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+      <a href="{% url 'dashboard' %}" class="btn btn-fun-blue">🚀 Let’s Get Started!</a>
+      <a href="{% url 'search' %}" class="btn btn-fun-yellow">🌟 Explore Ideas</a>
+    </div>
+  </section>
+
+  <br><br><br>
+
+  <!-- Carousel Section -->
+  <section class="carousel-wrapper text-center">
+    <h2 class="fw-bold mb-4">Top 3 Most Loved Ideas 💡</h2>
+
+    {% if top_ideas %}
+    <div id="ideasCarousel" class="carousel slide carousel-dark mx-auto" data-bs-ride="carousel" data-bs-interval="5000" style="width: 1100px;">
+
+      <!-- Indicators -->
+      <div class="carousel-indicators">
+        {% for idea in top_ideas %}
+          <button type="button" data-bs-target="#ideasCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
+            {% if forloop.first %}class="active"{% endif %}
+            aria-label="Slide {{ forloop.counter }}"></button>
+        {% endfor %}
+      </div>
+
+      <!-- Slides -->
+      <div class="carousel-inner rounded shadow-sm">
+        {% for idea in top_ideas %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <a href="{% url 'idea-detail' idea.slug %}" style="text-decoration:none;">
+            <div class="card-custom idea-card mx-auto p-4" style="max-width: 90%;">
+              <h1 style="font-weight:800">{{ idea.title }}</h1>
+              <p style="font-weight:200; padding: 5px 10px">{{ idea.description|truncatechars:180 }}</p>
+              <div class="chip">❤️ {{ idea.num_likes|intcomma }} likes</div>
+              <div class="meta mt-3 d-flex justify-content-between align-items-center">
+                {% if user.is_authenticated %}
+                {% else %}
+                  <a href="{% url 'login' %}" class="btn btn-outline-secondary">Login to Like</a>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Controls -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#ideasCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#ideasCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+    {% else %}
+      <p class="empty">No ideas yet — be the first to share one! 🌟</p>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// CSRF Helper function (already in your code)
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+}
+
+// Dashboard Theme Loader (already in your code)
+document.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("dashboardTheme");
+  const container = document.querySelector(".dashboard-container");
+
+  if (savedTheme && container) {
+    container.classList.add(`theme-${savedTheme}`);
+  }
+
+  // Rocket animation overlay logic
+  const overlay = document.getElementById('animationOverlay');
+  const dashboardContent = document.getElementById('dashboardContent');
+
+  // Start animation by adding class after short delay
+  setTimeout(() => {
+    overlay.classList.add('hero-animate');
+  }, 300);
+
+  // After animation ends (~3.5 seconds), fade out overlay and show dashboard
+  setTimeout(() => {
+    overlay.classList.add('fade-out');
+    dashboardContent.style.visibility = 'visible';
+  }, 3800); // Matches animation timings + fade out
+
+  // Like/star button logic (if any star buttons exist)
+  document.querySelectorAll(".star-btn").forEach(button => {
+    button.addEventListener("click", async () => {
+      const slug = button.dataset.slug;
+
+      try {
+        const res = await fetch(`/ideas/${slug}/like/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        });
+
+        if (!res.ok) throw new Error("Request failed");
+        const data = await res.json();
+
+        button.classList.toggle("starred", data.liked);
+        button.innerText = data.liked ? "★ Starred" : "☆ Star";
+        button.setAttribute("aria-pressed", data.liked.toString());
+      } catch (err) {
+        console.error("Like error:", err);
+      }
+    });
+  });
+});
+</script>
 {% endblock %}

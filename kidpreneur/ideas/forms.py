@@ -1,6 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, Idea
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .models import CustomUser, Idea, ContactMessage
 
 # -------------------------
 # Signup Form
@@ -78,4 +78,34 @@ class IdeaForm(forms.ModelForm):
 
     class Meta:
         model = Idea
-        fields = ['title', 'description', 'category']
+        fields = ['title', 'description', 'category', 'image', 'document']
+
+# -------------------------
+# Login Form (with placeholders)
+# -------------------------
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your username',
+            'autofocus': 'autofocus'
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your password'
+        })
+    )
+
+# forms.py
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = ContactMessage
+        fields = ['name', 'email', 'subject', 'message']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'subject': forms.TextInput(attrs={'class': 'form-control'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }

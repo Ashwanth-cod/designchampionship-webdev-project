@@ -1,7 +1,4 @@
-"""
-Django settings for kidpreneur project.
-"""
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -14,10 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-8jgwhlwrb^fgh$yh@jsd798szmayzz#-4z7g#x2a3d(7rb%0y$'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.29.20", '192.168.1.35']
+ALLOWED_HOSTS = ["192.168.29.20", '192.168.1.35', '127.0.0.1']
 
 
 # Application definition
@@ -32,6 +28,7 @@ INSTALLED_APPS = [
     'ideas',
     'django.contrib.humanize',
     "widget_tweaks",
+    "django_extensions"
 ]
 
 MIDDLEWARE = [
@@ -120,7 +117,13 @@ USE_L10N = True
 STATIC_URL = 'static/'
 LOGIN_URL = '/login/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# For the login page
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container text-center mt-5">
+  <div class="alert alert-warning">
+    <h4>⚠️Sorry! This idea has been archived</h4>
+    <p>The idea  is no longer available for public view.</p>
+    <a href="{% url 'home' %}" class="btn btn-primary mt-3">Go back to homepage</a>
+  </div>
+</div>
+{% endblock %}

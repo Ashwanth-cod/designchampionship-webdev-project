@@ -1,0 +1,13 @@
+<svg id="scene" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rocket -->
+  <g id="rocket">
+    <rect x="175" y="200" width="50" height="100" rx="10" ry="10" fill="#f44336"></rect>
+    <polygon points="200,200 230,150 170,150" fill="#f44336"></polygon>
+    <path d="M190 300 C180 350, 210 350, 200 300" fill="#FFEB3B"></path>
+  </g>
+  <!-- Smiling Moon -->
+  <circle id="moon" cx="300" cy="100" r="50" fill="yellow"></circle>
+  <circle cx="280" cy="90" r="10" fill="black"></circle>
+  <circle cx="320" cy="90" r="10" fill="black"></circle>
+  <path d="M290,120 Q300,130 310,120" stroke="black" stroke-width="2" fill="transparent"></path>
+</svg>

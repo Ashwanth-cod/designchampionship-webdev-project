@@ -19,25 +19,32 @@
       {% csrf_token %}
       {{ form.non_field_errors }}
 
-      <div class="mb-3">
-        {{ form.username|add_class:"form-control" }}
-        {% for error in form.username.errors %}
-          <div class="text-danger small mt-1">{{ error }}</div>
-        {% endfor %}
-      </div>
-
-      <div class="mb-3">
-        {{ form.password|add_class:"form-control" }}
-        {% for error in form.password.errors %}
-          <div class="text-danger small mt-1">{{ error }}</div>
-        {% endfor %}
-      </div>
-
       {% if next %}
         <input type="hidden" name="next" value="{{ next }}">
       {% endif %}
 
-      <button type="submit" class="btn-fun w-100 mt-3">Login</button>
+      <!-- Username Field -->
+      <div class="mb-3">
+        {{ form.username|add_class:"form-control" | attr:"id:username" }}
+        {% for error in form.username.errors %}
+          <div class="text-danger mt-1">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Password Field -->
+      <div class="mb-3 position-relative">
+        {{ form.password|add_class:"form-control pe-5" | attr:"id:password" }}
+        {% for error in form.password.errors %}
+          <div class="text-danger mt-1">{{ error }}</div>
+        {% endfor %}
+        <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2"
+                onclick="togglePassword()" style="z-index: 2;">
+          Show
+        </button>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn-fun w-100 mt-3" id="login-button" disabled>Login</button>
     </form>
 
     <p class="text-center mt-3">
@@ -46,6 +53,56 @@
   </div>
 </div>
 
+<script>
+  function togglePassword() {
+    const passwordInput = document.querySelector('input[name="password"]');
+    const toggleButton = event.currentTarget;
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      toggleButton.textContent = "Hide";
+    } else {
+      passwordInput.type = "password";
+      toggleButton.textContent = "Show";
+    }
+  }
+</script>
+
+<script>
+  function togglePassword() {
+    const passwordInput = document.querySelector('input[name="password"]');
+    const toggleButton = event.currentTarget;
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      toggleButton.textContent = "Hide";
+    } else {
+      passwordInput.type = "password";
+      toggleButton.textContent = "Show";
+    }
+  }
+
+  // Enable login button only when all fields are filled
+  document.addEventListener('DOMContentLoaded', function () {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('login-button');
+
+    function validateForm() {
+      const isFormFilled = usernameInput.value.trim() !== '' && passwordInput.value.trim() !== '';
+      loginButton.disabled = !isFormFilled;
+    }
+
+    usernameInput.addEventListener('input', validateForm);
+    passwordInput.addEventListener('input', validateForm);
+
+    // Initial check in case of browser autofill
+    validateForm();
+  });
+</script>
+
+
+<!-- Styles -->
 <style>
   input::placeholder {
     color: #999;
@@ -76,5 +133,13 @@
     border-radius: 12px;
     padding: 10px;
   }
+  .btn-fun:disabled {
+  background: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 </style>
 {% endblock %}

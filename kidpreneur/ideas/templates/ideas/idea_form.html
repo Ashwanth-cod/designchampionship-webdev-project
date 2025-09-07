@@ -18,7 +18,8 @@
       {% endfor %}
     {% endif %}
 
-    <form method="POST">
+    <!-- NOTE: enctype is required for file uploads -->
+    <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       {{ form.non_field_errors }}
 
@@ -45,6 +46,34 @@
         {{ form.category.label_tag }}
         {{ form.category }}
         {% for error in form.category.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Image Upload -->
+      <div class="mb-3">
+        {{ form.image.label_tag }}
+        {{ form.image }}
+        {% if form.instance.image %}
+          <div class="mt-2">
+            <img src="{{ form.instance.image.url }}" alt="Current image" style="max-width:200px; max-height:150px; border-radius:8px;">
+          </div>
+        {% endif %}
+        {% for error in form.image.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Document Upload -->
+      <div class="mb-3">
+        {{ form.document.label_tag }}
+        {{ form.document }}
+        {% if form.instance.document %}
+          <div class="mt-2">
+            <a href="{{ form.instance.document.url }}" target="_blank">View current document</a>
+          </div>
+        {% endif %}
+        {% for error in form.document.errors %}
           <div class="text-danger small mt-1">{{ error }}</div>
         {% endfor %}
       </div>

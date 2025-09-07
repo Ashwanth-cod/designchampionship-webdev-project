@@ -15,87 +15,29 @@
     flex-wrap: wrap;
     transition: background 0.3s ease, color 0.3s ease;
   }
-
   .theme-yellow { background: #fffbea; color: #664d03; }
-  .theme-blue { background: #e7f1ff; color: #084298; }
-  .theme-green { background: #e9f7ef; color: #0f5132; }
-  .theme-pink { background: #fde2e9; color: #702459; }
+  .theme-blue   { background: #e7f1ff; color: #084298; }
+  .theme-green  { background: #e9f7ef; color: #0f5132; }
+  .theme-pink   { background: #fde2e9; color: #702459; }
   .theme-purple { background: #f3e8ff; color: #4a148c; }
   .theme-orange { background: #fff4e5; color: #7c2d12; }
   .theme-danger { background: #f8d7da; color: #842029; }
 
-  .tab-section {
-    width: 3%;
-    min-width: 80px;
-  }
-
-  .tab-scroll-wrapper {
-    overflow-y: auto;
-    max-height: 90vh;
-  }
-
-  .nav-tabs {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .nav-tabs .nav-link {
-    text-align: center;
-    padding: 10px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .content-section {
-    flex: 1;
-    min-width: 250px;
-  }
-
-  .card-custom {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    background-color: #fff;
-    margin-bottom: 20px;
-  }
-
-  .idea-card {
-    background-color: #ffffffb3;
-  }
-
-  .profile .info-item {
-    margin-bottom: 8px;
-  }
-
-  .profile i,
-  .profile svg,
-  .card-custom i,
-  .card-custom svg {
-    color: currentColor;
-    vertical-align: middle;
-    margin-right: 6px;
-  }
-
-  #updateFormContainer form {
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-  }
-
-  #updateFormContainer input,
-  #updateFormContainer select {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-
-  #updateFormContainer button {
-    margin-top: 10px;
-  }
+  .tab-section { width: 3%; min-width: 80px; }
+  .tab-scroll-wrapper { overflow-y: auto; max-height: 90vh; }
+  .nav-tabs { display: flex; flex-direction: column; gap: 10px; }
+  .nav-tabs .nav-link { text-align: center; padding: 10px; white-space: nowrap; flex-shrink: 0; }
+  .nav-tabs .nav-link.active { background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+  .content-section { flex: 1; min-width: 250px; }
+  .card-custom { border: 1px solid #ddd; border-radius: 8px; padding: 15px; background-color: #fff; margin-bottom: 20px; }
+  .idea-card { background-color: #ffffffb3; }
+  .profile .info-item { margin-bottom: 8px; }
+  .profile i { color: currentColor; vertical-align: middle; margin-right: 6px; }
+  #updateFormContainer form { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ccc; }
+  #updateFormContainer input, #updateFormContainer select { width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; }
+  #updateFormContainer button { margin-top: 10px; }
+  .action-btn { min-width: 80px; }
+  .ideabtn { border-radius: 10px; border: 5px solid white; }
 </style>
 {% endblock %}
 
@@ -103,35 +45,49 @@
 <div class="dashboard-container" id="dashboardContainer">
   <div class="tab-section">
     <div class="tab-scroll-wrapper">
-      <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ideas">💡</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#starred">⭐</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#archived">🗂️</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#create">➕</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#custom">🎨</button></li>
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile">👤</button></li>
+      <ul class="nav nav-tabs" role="tablist" aria-orientation="vertical">
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ideas" role="tab" aria-controls="ideas" title="My Ideas">💡</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#starred" role="tab" aria-controls="starred" title="Starred Ideas">⭐</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#archived" role="tab" aria-controls="archived" title="Archived Ideas">🗂️</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#create" role="tab" aria-controls="create" title="Create Idea">➕</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile" role="tab" aria-controls="profile" title="Profile">👤</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#theme" role="tab" aria-controls="theme" title="Customize Theme">🎨</button>
+        </li>
       </ul>
     </div>
   </div>
 
   <div class="content-section">
     <div class="tab-content p-3 card-custom">
-      
-      <div class="tab-pane fade" id="ideas">
-        <h3>💡 My Ideas</h3>
+
+      <!-- My Ideas -->
+      <div class="tab-pane fade show active" id="ideas" role="tabpanel">
+        <h1 style="text-align:center;">💡 My Ideas</h1>
         {% for idea in ideas %}
           <div class="card-custom idea-card mb-3">
-            <a href="{% url 'idea-detail' idea.slug %}" style="text-decoration:none; color: inherit;">
-              <b><h2>{{ idea.title }}</h2></b>
+            <a href="{% url 'idea-detail' idea.slug %}" style="text-decoration:none; color:inherit;">
+              <h2><b>{{ idea.title }}</b></h2>
               <p>{{ idea.description|truncatewords:15 }}</p>
               <div class="d-flex justify-content-between align-items-center mt-2">
-                <small>By <b>{{ idea.user.username }}</b> • {{ idea.created_at|date:"M d, Y" }}</small>
+                <small>Created at {{ idea.created_at|date:"M d, Y" }}</small>
                 <span>👍 {{ idea.likes.count }}</span>
               </div>
             </a>
             <div class="mt-2 d-flex gap-2">
-              <a href="{% url 'idea_update' idea.slug %}" class="btn btn-sm btn-primary">Edit</a>
-              <button class="btn btn-sm btn-warning open-action-modal" data-action="archive" data-id="{{ idea.id }}">Archive</button>
+              <a href="{% url 'idea_update' idea.slug %}" class="btn ideabtn btn-sm btn-primary action-btn">Edit</a>
+              <button class="btn ideabtn btn-sm btn-warning action-btn open-action-modal" data-action="archive" data-id="{{ idea.id }}">Archive</button>
+              <button class="btn ideabtn btn-sm btn-danger action-btn open-action-modal" data-action="delete" data-id="{{ idea.id }}">Delete</button>
             </div>
           </div>
         {% empty %}
@@ -139,12 +95,13 @@
         {% endfor %}
       </div>
 
-      <div class="tab-pane fade" id="starred">
-        <h3>⭐ Starred Ideas</h3>
+      <!-- Starred Ideas -->
+      <div class="tab-pane fade" id="starred" role="tabpanel">
+        <h1 style="text-align:center;">⭐ Starred Ideas</h1>
         {% for idea in starred_ideas %}
-          <a href="{% url 'idea-detail' idea.slug %}" style="text-decoration:none">
+          <a href="{% url 'idea-detail' idea.slug %}" style="text-decoration:none; color:inherit;">
             <div class="card-custom idea-card mb-3">
-              <b><h2>{{ idea.title }}</h2></b>
+              <h2><b>{{ idea.title }}</b></h2>
               <p>{{ idea.description|truncatewords:15 }}</p>
               <div class="d-flex justify-content-between align-items-center mt-2">
                 <small>By <b>{{ idea.user.username }}</b> • {{ idea.created_at|date:"M d, Y" }}</small>
@@ -157,19 +114,20 @@
         {% endfor %}
       </div>
 
-      <div class="tab-pane fade" id="archived">
-        <h3>🗂️ Archived Ideas</h3>
+      <!-- Archived Ideas -->
+      <div class="tab-pane fade" id="archived" role="tabpanel">
+        <h1 style="text-align:center;">🗂️ Archived Ideas</h1>
         {% for idea in archived_ideas %}
           <div class="card-custom idea-card mb-3">
-            <b><h2>{{ idea.title }}</h2></b>
+            <h2><b>{{ idea.title }}</b></h2>
             <p>{{ idea.description|truncatewords:15 }}</p>
             <div class="d-flex justify-content-between align-items-center mt-2">
               <small>By <b>{{ idea.user.username }}</b> • {{ idea.created_at|date:"M d, Y" }}</small>
               <span>👍 {{ idea.likes.count }}</span>
             </div>
             <div class="mt-2 d-flex gap-2">
-              <button class="btn btn-sm btn-warning open-action-modal" data-action="unarchive" data-id="{{ idea.id }}">Unarchive</button>
-              <button class="btn btn-sm btn-danger open-action-modal" data-action="delete" data-id="{{ idea.id }}">Delete</button>
+              <button class="btn btn-sm btn-warning action-btn open-action-modal" data-action="unarchive" data-id="{{ idea.id }}">Unarchive</button>
+              <button class="btn btn-sm btn-danger action-btn open-action-modal" data-action="delete" data-id="{{ idea.id }}">Delete</button>
             </div>
           </div>
         {% empty %}
@@ -177,9 +135,9 @@
         {% endfor %}
       </div>
 
-      <div class="tab-pane fade" id="create">
-        <h3>➕ Create New Idea</h3>
-        <br>
+      <!-- Create Idea -->
+      <div class="tab-pane fade" id="create" role="tabpanel">
+        <h1 style="text-align:center;">➕ Create New Idea</h1>
         <a href="{% url 'idea_create' %}" class="create-idea-card" style="text-decoration:none;">
           <div class="text">
             <h4>Create Your Next Idea</h4>
@@ -188,125 +146,266 @@
         </a>
       </div>
 
-      <div class="tab-pane fade" id="custom">
-        <h3>🎨 Customize Dashboard Theme</h3>
-        <br>
-        <form id="themeForm">
-          <div class="mb-3">
-            <label for="themeSelect" class="form-label"><b>Select Theme:</b></label>
-            <select id="themeSelect" class="form-select">
-              <option value="theme-yellow">Yellow</option>
-              <option value="theme-blue">Blue</option>
-              <option value="theme-green">Green</option>
-              <option value="theme-pink">Pink</option>
-              <option value="theme-purple">Purple</option>
-              <option value="theme-orange">Orange</option>
-              <option value="theme-danger">Red</option>
-            </select>
-          </div>
-        </form>
+<!-- Profile -->
+  <div class="tab-pane fade" id="profile" role="tabpanel">
+    <h1 style="text-align:center;">👤 My Profile</h1>
+
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card-custom text-center">
+        <i class="bi bi-lightbulb-fill fs-3"></i>
+        <div><b>Total Ideas</b></div>
+        <div>{{ ideas|length }}</div>
       </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card-custom text-center">
+        <i class="bi bi-star-fill fs-3"></i>
+        <div><b>Starred</b></div>
+        <div>{{ starred_ideas|length }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card-custom text-center">
+        <i class="bi bi-archive-fill fs-3"></i>
+        <div><b>Archived</b></div>
+        <div>{{ archived_ideas|length }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card-custom text-center">
+        <i class="bi bi-hand-thumbs-up-fill fs-3"></i>
+        <div><b>Total Likes</b></div>
+        <div>{{ total_likes }}</div>
+      </div>
+    </div>
+  </div>
 
-      <div class="tab-pane fade show active" id="profile">
-        <h3>👤 My Profile</h3>
+  <!-- Profile Info -->
+  <div class="card-custom profile mb-3">
+    <h2>Profile Information</h2>
+    <div class="info-item"><i class="bi bi-person-fill"></i> Username: {{ user.username }}</div>
+    <div class="info-item"><i class="bi bi-envelope-fill"></i> Email: {{ user.email }}</div>
+    <div class="info-item"><i class="bi bi-phone-fill"></i> Phone: {{ user.phone_number|default:"Not set" }}</div>
+    <div class="info-item"><i class="bi bi-calendar-fill"></i> Birth Date: {{ user.dob|date:"M d, Y"|default:"Not set" }}</div>
+  </div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-md-3">
-            <div class="card-custom text-center">
-              <i class="bi bi-lightbulb-fill fs-3"></i>
-              <div><b>Total Ideas</b></div>
-              <div>{{ ideas|length }}</div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card-custom text-center">
-              <i class="bi bi-star-fill fs-3"></i>
-              <div><b>Starred</b></div>
-              <div>{{ starred_ideas|length }}</div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card-custom text-center">
-              <i class="bi bi-archive-fill fs-3"></i>
-              <div><b>Archived</b></div>
-              <div>{{ archived_ideas|length }}</div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card-custom text-center">
-              <i class="bi bi-hand-thumbs-up-fill fs-3"></i>
-              <div><b>Total Likes</b></div>
-              <div>{{ total_likes }}</div>
-            </div>
-          </div>
+  <!-- Followers & Following -->
+  <div class="card-custom profile mb-3">
+    <h2>Connections</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <h4><i class="bi bi-person-check-fill"></i> Followers ({{ followers|length }})</h4>
+        {% if followers %}
+          <ul class="list-group">
+            {% for follower in followers %}
+              <li class="list-group-item d-flex align-items-center">
+                <i class="bi bi-person-circle me-2"></i>
+                <a href="{% url 'user-profile' follower.username %}">{{ follower.username }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No followers yet.</p>
+          {% endif %}
         </div>
-
-        <div class="card-custom profile mt-3">
-          <div class="info-item"><i class="bi bi-person-circle"></i><b>Username:</b> {{ request.user.username }}</div>
-          <div class="info-item"><i class="bi bi-envelope"></i><b>Email:</b> {{ request.user.email }}</div>
-          <div class="info-item"><i class="bi bi-person-fill"></i><b>First Name:</b> {{ request.user.first_name }}</div>
-          <div class="info-item"><i class="bi bi-person-fill"></i><b>Last Name:</b> {{ request.user.last_name }}</div>
-          <div class="info-item"><i class="bi bi-phone"></i><b>Phone:</b> {{ request.user.phone_number|default:"N/A" }}</div>
-          <div class="info-item"><i class="bi bi-calendar"></i><b>Date of Birth:</b> {{ request.user.dob|default:"N/A" }}</div>
-          <div class="info-item"><i class="bi bi-clock-history"></i><b>Days Since Joined:</b> {{ days_since_joined }}</div>
-          <div class="info-item"><i class="bi bi-graph-up"></i><b>Student:</b>
-            {% if request.user.is_student %}
-              Yes
-              <div class="info-item"><i class="bi bi-mortarboard"></i><b>School:</b> {{ request.user.school_name|default:"N/A" }}</div>
-            {% else %}
-              No
-            {% endif %}
-          </div>
-
-          <div class="mt-3">
-            <button id="toggleUpdateForm" class="btn btn-outline-primary w-100">✏️ Update Profile</button>
-          </div>
-
-          <div id="updateFormContainer" style="display:none; margin-top:15px;">
-            <form method="POST">
-              {% csrf_token %}
-              <input type="hidden" name="profile_update" value="1">
-              {{ user_form.as_p }}
-              <button type="submit" class="btn btn-outline-success w-100 mt-2">💾 Save Changes</button>
-            </form>
-          </div>
+        <div class="col-md-6">
+          <h4><i class="bi bi-person-plus-fill"></i> Following ({{ following|length }})</h4>
+          {% if following %}
+            <ul class="list-group">
+              {% for followee in following %}
+                <li class="list-group-item d-flex align-items-center">
+                  <i class="bi bi-person-circle me-2"></i>
+                  <a href="{% url 'user-profile' followee.username %}">{{ followee.username }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>Not following anyone.</p>
+          {% endif %}
         </div>
       </div>
+    </div>
 
+    <!-- Add this button above the form -->
+<button id="editProfileBtn" class="btn btn-primary mb-3">Edit Profile</button>
+
+<!-- Wrap the form container in a div with style to hide initially -->
+<div id="updateFormContainer" style="display: none;">
+  <h3>Update Profile</h3>
+  <form method="post" action="{% url 'dashboard' %}" novalidate>
+    {% csrf_token %}
+    {{ profile_update_form.as_p }}
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <button type="button" id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
+  </form>
+</div>
+
+
+      <!-- Theme Customization -->
+      <div class="tab-pane fade" id="theme" role="tabpanel">
+        <h1 style="text-align:center;">🎨 Customize Theme</h1>
+        <label for="themeSelect" class="form-label">Choose your preferred color theme:</label>
+        <select id="themeSelect" class="form-select w-50 mx-auto">
+          <option value="theme-yellow">Yellow</option>
+          <option value="theme-blue">Blue</option>
+          <option value="theme-green">Green</option>
+          <option value="theme-pink">Pink</option>
+          <option value="theme-purple">Purple</option>
+          <option value="theme-orange">Orange</option>
+          <option value="theme-danger">Danger (Red)</option>
+        </select>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- Modal for delete/archive/unarchive confirmation -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog">
+    <form id="confirmActionForm" method="post" class="modal-content" novalidate>
+      {% csrf_token %}
+      <div class="modal-header">
+        <h5 class="modal-title" id="actionModalLabel">Confirm Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="actionModalMessage"></p>
+        <div class="mb-3">
+          <label for="confirmPassword" class="form-label">Enter your password to confirm:</label>
+          <input type="password" id="confirmPassword" name="password" class="form-control" required minlength="6" aria-describedby="passwordHelp" autocomplete="current-password">
+          <div id="passwordHelp" class="form-text">Your password is required to perform this action.</div>
+          <div id="modalError" class="text-danger mt-2"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const container = document.getElementById("dashboardContainer");
-    const savedTheme = localStorage.getItem("dashboardTheme");
-    if (savedTheme) {
-      container.classList.add(savedTheme);
-      document.getElementById("themeSelect").value = savedTheme;
-    } else {
-      container.classList.add("theme-yellow");
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("dashboardContainer");
+  const themeSelect = document.getElementById("themeSelect");
+
+  // Load saved theme or default
+  const savedTheme = localStorage.getItem("dashboardTheme") || "theme-yellow";
+  container.classList.add(savedTheme);
+  themeSelect.value = savedTheme;
+
+  // Change theme and save
+  themeSelect.addEventListener("change", () => {
+    const newTheme = themeSelect.value;
+    container.classList.forEach(cls => {
+      if (cls.startsWith("theme-")) container.classList.remove(cls);
+    });
+    container.classList.add(newTheme);
+    localStorage.setItem("dashboardTheme", newTheme);
+  });
+
+  // Modal elements
+  const actionModalEl = document.getElementById('actionModal');
+  const actionModal = new bootstrap.Modal(actionModalEl);
+  const confirmActionForm = document.getElementById('confirmActionForm');
+  const actionModalMessage = document.getElementById('actionModalMessage');
+  const confirmActionBtn = document.getElementById('confirmActionBtn');
+  const modalError = document.getElementById('modalError');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+
+  let currentAction = null;
+  let currentIdeaId = null;
+
+  // Open modal on action buttons
+  document.querySelectorAll(".open-action-modal").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      currentAction = e.currentTarget.dataset.action;
+      currentIdeaId = e.currentTarget.dataset.id;
+      modalError.textContent = '';
+      confirmPasswordInput.value = '';
+
+      // Style confirm button depending on action
+      confirmActionBtn.classList.toggle("btn-danger", currentAction === "delete");
+      confirmActionBtn.classList.toggle("btn-warning", currentAction !== "delete");
+
+      if (currentAction === "delete") {
+        actionModalMessage.innerHTML = "Are you sure you want to <b>delete</b> this idea?";
+      } else if (currentAction === "archive") {
+        actionModalMessage.innerHTML = "Are you sure you want to <b>archive</b> this idea?";
+      } else if (currentAction === "unarchive") {
+        actionModalMessage.innerHTML = "Are you sure you want to <b>unarchive</b> this idea?";
+      } else {
+        actionModalMessage.textContent = "Please confirm your action.";
+      }
+
+      actionModal.show();
+    });
+  });
+
+  // Submit modal form
+  confirmActionForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    modalError.textContent = '';
+    const password = confirmPasswordInput.value.trim();
+
+    if (!password || password.length < 6) {
+      modalError.textContent = 'Please enter a valid password (at least 6 characters).';
+      return;
     }
 
-    document.getElementById("themeSelect").addEventListener("change", (e) => {
-      const newTheme = e.target.value;
-      container.classList.forEach(cls => {
-        if (cls.startsWith("theme-")) container.classList.remove(cls);
-      });
-      container.classList.add(newTheme);
-      localStorage.setItem("dashboardTheme", newTheme);
-      location.reload();
-    });
+    confirmActionBtn.disabled = true;
+    confirmActionBtn.textContent = "Processing...";
 
-    const toggleUpdate = document.getElementById("toggleUpdateForm");
-    if (toggleUpdate) {
-      toggleUpdate.addEventListener("click", () => {
-        const formContainer = document.getElementById("updateFormContainer");
-        const visible = formContainer.style.display === "block";
-        formContainer.style.display = visible ? "none" : "block";
-        toggleUpdate.textContent = visible ? "✏️ Update Profile" : "❌ Cancel Update";
+    try {
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      const response = await fetch("{% url 'idea_action' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({
+          action: currentAction,
+          idea_id: currentIdeaId,
+          password: password
+        }),
       });
+
+      if (response.ok) {
+        location.reload();
+      } else {
+        const errorData = await response.json();
+        modalError.textContent = errorData.error || "An error occurred. Please try again.";
+      }
+    } catch (error) {
+      modalError.textContent = "Network error. Please try again.";
+    } finally {
+      confirmActionBtn.disabled = false;
+      confirmActionBtn.textContent = "Confirm";
     }
   });
+
+  // Profile update form toggle logic
+  const editBtn = document.getElementById('editProfileBtn');
+  const cancelBtn = document.getElementById('cancelEditBtn');
+  const formContainer = document.getElementById('updateFormContainer');
+
+  editBtn.addEventListener('click', () => {
+    formContainer.style.display = 'block';
+    editBtn.style.display = 'none';
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    formContainer.style.display = 'none';
+    editBtn.style.display = 'inline-block';
+  });
+
+});
 </script>
 {% endblock %}
