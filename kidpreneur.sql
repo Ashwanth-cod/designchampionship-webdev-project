@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 05, 2025 at 12:56 PM
+-- Generation Time: Sep 08, 2025 at 05:10 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -101,7 +101,48 @@ INSERT INTO `auth_permission` (`id`, `name`, `content_type_id`, `codename`) VALU
 (37, 'Can add follow', 10, 'add_follow'),
 (38, 'Can change follow', 10, 'change_follow'),
 (39, 'Can delete follow', 10, 'delete_follow'),
-(40, 'Can view follow', 10, 'view_follow');
+(40, 'Can view follow', 10, 'view_follow'),
+(41, 'Can add contact message', 11, 'add_contactmessage'),
+(42, 'Can change contact message', 11, 'change_contactmessage'),
+(43, 'Can delete contact message', 11, 'delete_contactmessage'),
+(44, 'Can view contact message', 11, 'view_contactmessage'),
+(45, 'Can add conversation', 12, 'add_conversation'),
+(46, 'Can change conversation', 12, 'change_conversation'),
+(47, 'Can delete conversation', 12, 'delete_conversation'),
+(48, 'Can view conversation', 12, 'view_conversation'),
+(49, 'Can add message', 13, 'add_message'),
+(50, 'Can change message', 13, 'change_message'),
+(51, 'Can delete message', 13, 'delete_message'),
+(52, 'Can view message', 13, 'view_message'),
+(53, 'Can add message report', 14, 'add_messagereport'),
+(54, 'Can change message report', 14, 'change_messagereport'),
+(55, 'Can delete message report', 14, 'delete_messagereport'),
+(56, 'Can view message report', 14, 'view_messagereport'),
+(57, 'Can add message reaction', 15, 'add_messagereaction'),
+(58, 'Can change message reaction', 15, 'change_messagereaction'),
+(59, 'Can delete message reaction', 15, 'delete_messagereaction'),
+(60, 'Can view message reaction', 15, 'view_messagereaction');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `conversation`
+--
+
+CREATE TABLE `conversation` (
+  `id` bigint(20) NOT NULL,
+  `subject` varchar(255) NOT NULL DEFAULT '(No Subject)',
+  `user1_id` bigint(20) NOT NULL,
+  `user2_id` bigint(20) NOT NULL,
+  `created_at` datetime(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `conversation`
+--
+
+INSERT INTO `conversation` (`id`, `subject`, `user1_id`, `user2_id`, `created_at`) VALUES
+(1, 'Hi test', 2, 3, '2025-09-08 01:43:34.073957');
 
 -- --------------------------------------------------------
 
@@ -142,10 +183,15 @@ INSERT INTO `django_content_type` (`id`, `app_label`, `model`) VALUES
 (2, 'auth', 'permission'),
 (4, 'contenttypes', 'contenttype'),
 (8, 'ideas', 'comment'),
+(11, 'ideas', 'contactmessage'),
+(12, 'ideas', 'conversation'),
 (6, 'ideas', 'customuser'),
 (10, 'ideas', 'follow'),
 (7, 'ideas', 'idea'),
 (9, 'ideas', 'like'),
+(13, 'ideas', 'message'),
+(15, 'ideas', 'messagereaction'),
+(14, 'ideas', 'messagereport'),
 (5, 'sessions', 'session');
 
 -- --------------------------------------------------------
@@ -186,7 +232,10 @@ INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
 (18, 'admin', '0003_logentry_add_action_flag_choices', '2025-09-04 20:04:56.449875'),
 (19, 'sessions', '0001_initial', '2025-09-04 20:04:56.481717'),
 (20, 'ideas', '0002_comment_created_at', '2025-09-04 20:09:58.602802'),
-(21, 'ideas', '0003_idea_is_archived', '2025-09-04 21:05:06.817556');
+(21, 'ideas', '0003_idea_is_archived', '2025-09-04 21:05:06.817556'),
+(22, 'ideas', '0002_alter_conversation_table', '2025-09-07 17:11:30.807793'),
+(23, 'ideas', '0003_alter_message_options_message_attachment_and_more', '2025-09-07 17:17:12.673660'),
+(24, 'ideas', '0004_alter_message_options_conversation_subject_and_more', '2025-09-07 17:21:48.274463');
 
 -- --------------------------------------------------------
 
@@ -205,7 +254,10 @@ CREATE TABLE `django_session` (
 --
 
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
-('fwo3g98ioodwebg5xxs7h9n9jyippl5b', '.eJxVjDkOwjAURO_iGll4kw0lPWew_mYcQI4UJ1XE3UmkFFDOvDezqgzLXPPSZcoDq6uy6vTbIdBL2g74Ce0xahrbPA2od0UftOv7yPK-He7fQYVet_U5IiTgSCGIj4SXYiRggOQwWBtdIhbyYgx4b5wtBYHdli1EoWST-nwB_kc4hQ:1uuS99:zvHUTkuZ6wzzJQKTjCYaxyhEpDAaQUou20PIKFXPh5o', '2025-09-19 08:50:15.508935');
+('d7askd0y0c6j0jdgy0o66sark67txvsq', '.eJxVjDkOwjAURO_iGll4kw0lPWew_mYcQI4UJ1XE3UmkFFDOvDezqgzLXPPSZcoDq6uy6vTbIdBL2g74Ce0xahrbPA2od0UftOv7yPK-He7fQYVet_U5IiTgSCGIj4SXYiRggOQwWBtdIhbyYgx4b5wtBYHdli1EoWST-nwB_kc4hQ:1uvQxu:gH02m7BJZ-YMH74XrKLLrj_UHzWjfOdhKOKMkiWAgNM', '2025-09-22 01:46:42.993001'),
+('d82v0lm78nkux2oeogdt6a0hn1fgokbo', '.eJxVjDkOwjAURO_iGll4kw0lPWew_mYcQI4UJ1XE3UmkFFDOvDezqgzLXPPSZcoDq6uy6vTbIdBL2g74Ce0xahrbPA2od0UftOv7yPK-He7fQYVet_U5IiTgSCGIj4SXYiRggOQwWBtdIhbyYgx4b5wtBYHdli1EoWST-nwB_kc4hQ:1uvJiu:DYK2lpX-lgC6C-2zpYe1FLCo_-jC6JIYrKuSe3SEbEc', '2025-09-21 18:02:44.227205'),
+('fwo3g98ioodwebg5xxs7h9n9jyippl5b', '.eJxVjDkOwjAURO_iGll4kw0lPWew_mYcQI4UJ1XE3UmkFFDOvDezqgzLXPPSZcoDq6uy6vTbIdBL2g74Ce0xahrbPA2od0UftOv7yPK-He7fQYVet_U5IiTgSCGIj4SXYiRggOQwWBtdIhbyYgx4b5wtBYHdli1EoWST-nwB_kc4hQ:1uuS99:zvHUTkuZ6wzzJQKTjCYaxyhEpDAaQUou20PIKFXPh5o', '2025-09-19 08:50:15.508935'),
+('pg049iknccq36fxvdpvjmbqpynof3a47', '.eJxVjEsOAiEQBe_C2hCg-YhL956BNE0rowaSYWZlvLtOMgvdvqp6L5FwXWpaB89pKuIkQBx-t4z04LaBcsd265J6W-Ypy02ROx3y0gs_z7v7d1Bx1G_tVEC2hN7pcC25qGgVs84OvYV8pEIRovHASMFbRAgAGIMmg9Yb68T7A_CvN8Y:1uvRO2:df9gXTiCl4NhaYJsRcBQXIj6GOPoNc92cqZIGQ91qoY', '2025-09-22 02:13:42.632982');
 
 -- --------------------------------------------------------
 
@@ -218,6 +270,20 @@ CREATE TABLE `ideas_comment` (
   `text` longtext NOT NULL,
   `idea_id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,
+  `created_at` datetime(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ideas_conversation`
+--
+
+CREATE TABLE `ideas_conversation` (
+  `id` bigint(20) NOT NULL,
+  `subject` varchar(255) NOT NULL DEFAULT '(No Subject)',
+  `user1_id` bigint(20) NOT NULL,
+  `user2_id` bigint(20) NOT NULL,
   `created_at` datetime(6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -250,7 +316,8 @@ CREATE TABLE `ideas_customuser` (
 --
 
 INSERT INTO `ideas_customuser` (`id`, `password`, `last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `is_staff`, `is_active`, `date_joined`, `email`, `dob`, `is_student`, `school_name`, `phone_number`) VALUES
-(2, 'pbkdf2_sha256$600000$dXoeAk0g3Eyvz8ysSlrrSF$a6zQ+BsH61pasB8CTvI+yj1762HXW+bIfXcbEVbxu8I=', '2025-09-05 08:50:15.507929', 0, 'FI.programming.tamil@gmail.com', 'Ashwanth', 'S', 0, 1, '2025-09-04 20:11:37.285574', 'ashwanth.ars@gmail.com', '2012-02-12', 0, '', '09894843555');
+(2, 'pbkdf2_sha256$600000$dXoeAk0g3Eyvz8ysSlrrSF$a6zQ+BsH61pasB8CTvI+yj1762HXW+bIfXcbEVbxu8I=', '2025-09-08 01:46:42.990995', 0, 'FI.programming.tamil@gmail.com', 'Ashwanth', 'S', 0, 1, '2025-09-04 20:11:37.285574', 'ashwanth.ars@gmail.com', '2012-02-12', 0, '', '09894843555'),
+(3, 'pbkdf2_sha256$600000$YTnL9GHG7j4h9oFQve3eRm$UvTnC5dbOnTSC5Rs9FfdWdVvcEHxiI6a+uSGj7qO7gM=', '2025-09-08 02:13:42.631153', 0, 'ashwanth.ars@gmail.com', 'Ashwanth', 'S', 0, 1, '2025-09-07 18:03:35.190465', 'arsclothing18@gmail.com', '2000-04-03', 0, '', '09894843555');
 
 -- --------------------------------------------------------
 
@@ -303,18 +370,20 @@ CREATE TABLE `ideas_idea` (
   `category` varchar(100) NOT NULL,
   `created_at` datetime(6) NOT NULL,
   `created_by_id` bigint(20) NOT NULL,
-  `is_archived` tinyint(1) NOT NULL
+  `is_archived` tinyint(1) NOT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `document` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `ideas_idea`
 --
 
-INSERT INTO `ideas_idea` (`id`, `title`, `slug`, `description`, `category`, `created_at`, `created_by_id`, `is_archived`) VALUES
-(3, 'Fitbro', 'fit4fun-home-fitness', 'Fit4Fun: Home Fitness Challenge is your ultimate companion for staying active, energized, and motivated—all from the comfort of your home. Designed for individuals of all fitness levels, this challenge blends fun, flexibility, and results into a dynamic daily routine that fits your lifestyle. Whether you\'re a beginner looking to kickstart your wellness journey or a seasoned fitness enthusiast seeking variety, Fit4Fun offers a structured yet adaptable program that keeps you moving and smiling.\r\nEach day introduces a new workout theme—from cardio bursts and core sculpting to balance training and flexibility flows. No fancy equipment needed—just your body, a bit of space, and a commitment to show up. With short, effective sessions ranging from 10 to 20 minutes, Fit4Fun makes it easy to squeeze in fitness between meetings, chores, or study breaks.\r\nThe challenge also includes a progress tracker to log your workouts, celebrate milestones, and stay accountable. You’ll find motivational tips, curated video links, and', 'sports', '2025-09-04 20:13:58.105303', 2, 0),
-(4, 'GreenLoop', 'greenloop', 'GreenLoop is a digital platform that connects individuals and businesses to local recycling, upcycling, and sustainable product services. The app uses geolocation and AI to recommend nearby drop-off points for recyclables, match users with artisans who upcycle materials into new products, and offer eco-friendly alternatives to common household items.\r\nKey features include:\r\n- ♻️ Smart Sorting Assistant: Users scan items to learn how and where to dispose of them properly\r\n- 🛍️ Eco Marketplace: A curated space for upcycled goods and sustainable brands\r\n- 📊 Impact Tracker: Visualizes users\' environmental contributions over time\r\nGreenLoop aims to make sustainability not just accessible, but rewarding—turning everyday waste into community-driven value.', 'social', '2025-09-05 08:21:56.854145', 2, 0),
-(5, 'EchoMentor', 'echomentor', 'EchoMentor is a voice-based micro-learning app that delivers daily 5-minute lessons from top experts in fields like business, psychology, and design. Users choose a topic, and the app sends bite-sized audio insights each morning—perfect for commutes or coffee breaks. It also includes interactive voice quizzes to reinforce learning and track progress over time. EchoMentor turns passive listening into active growth, making expert knowledge accessible and engaging for busy minds.', 'tech', '2025-09-05 08:22:30.263614', 2, 0),
-(6, 'MindMesh', 'mindmesh', 'MindMesh is a collaborative brainstorming platform for remote teams, designed to mimic the energy of in-person ideation. It uses AI to suggest connections between ideas, highlight gaps, and even generate creative prompts based on team goals. With real-time sketching, voice notes, and mood boards, MindMesh helps teams co-create like they\'re in the same room—even when they\'re continents apart. It’s like a digital whiteboard with a brain of its own.', 'tech', '2025-09-05 08:22:52.729942', 2, 0);
+INSERT INTO `ideas_idea` (`id`, `title`, `slug`, `description`, `category`, `created_at`, `created_by_id`, `is_archived`, `image`, `document`) VALUES
+(3, 'Fitbro', 'fit4fun-home-fitness', 'Fit4Fun: Home Fitness Challenge is your ultimate companion for staying active, energized, and motivated—all from the comfort of your home. Designed for individuals of all fitness levels, this challenge blends fun, flexibility, and results into a dynamic daily routine that fits your lifestyle. Whether you\'re a beginner looking to kickstart your wellness journey or a seasoned fitness enthusiast seeking variety, Fit4Fun offers a structured yet adaptable program that keeps you moving and smiling.\r\nEach day introduces a new workout theme—from cardio bursts and core sculpting to balance training and flexibility flows. No fancy equipment needed—just your body, a bit of space, and a commitment to show up. With short, effective sessions ranging from 10 to 20 minutes, Fit4Fun makes it easy to squeeze in fitness between meetings, chores, or study breaks.\r\nThe challenge also includes a progress tracker to log your workouts, celebrate milestones, and stay accountable. You’ll find motivational tips, curated video links, and', 'sports', '2025-09-04 20:13:58.105303', 2, 0, NULL, NULL),
+(4, 'GreenLoop', 'greenloop', 'GreenLoop is a digital platform that connects individuals and businesses to local recycling, upcycling, and sustainable product services. The app uses geolocation and AI to recommend nearby drop-off points for recyclables, match users with artisans who upcycle materials into new products, and offer eco-friendly alternatives to common household items.\r\nKey features include:\r\n- ♻️ Smart Sorting Assistant: Users scan items to learn how and where to dispose of them properly\r\n- 🛍️ Eco Marketplace: A curated space for upcycled goods and sustainable brands\r\n- 📊 Impact Tracker: Visualizes users\' environmental contributions over time\r\nGreenLoop aims to make sustainability not just accessible, but rewarding—turning everyday waste into community-driven value.', 'social', '2025-09-05 08:21:56.854145', 2, 0, 'idea_images/pic_DHPviVX.webp', ''),
+(5, 'EchoMentor', 'echomentor', 'EchoMentor is a voice-based micro-learning app that delivers daily 5-minute lessons from top experts in fields like business, psychology, and design. Users choose a topic, and the app sends bite-sized audio insights each morning—perfect for commutes or coffee breaks. It also includes interactive voice quizzes to reinforce learning and track progress over time. EchoMentor turns passive listening into active growth, making expert knowledge accessible and engaging for busy minds.', 'tech', '2025-09-05 08:22:30.263614', 2, 0, NULL, NULL),
+(6, 'MindMesh', 'mindmesh', 'MindMesh is a collaborative brainstorming platform for remote teams, designed to mimic the energy of in-person ideation. It uses AI to suggest connections between ideas, highlight gaps, and even generate creative prompts based on team goals. With real-time sketching, voice notes, and mood boards, MindMesh helps teams co-create like they\'re in the same room—even when they\'re continents apart. It’s like a digital whiteboard with a brain of its own.', 'tech', '2025-09-05 08:22:52.729942', 2, 0, 'idea_images/pic_CKvw4hP.jpeg', '');
 
 -- --------------------------------------------------------
 
@@ -327,6 +396,13 @@ CREATE TABLE `ideas_idea_starred_by` (
   `idea_id` bigint(20) NOT NULL,
   `customuser_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ideas_idea_starred_by`
+--
+
+INSERT INTO `ideas_idea_starred_by` (`id`, `idea_id`, `customuser_id`) VALUES
+(2, 3, 2);
 
 -- --------------------------------------------------------
 
@@ -347,6 +423,39 @@ CREATE TABLE `ideas_like` (
 
 INSERT INTO `ideas_like` (`id`, `created_at`, `idea_id`, `user_id`) VALUES
 (5, '2025-09-05 08:26:58.515615', 3, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ideas_message`
+--
+
+CREATE TABLE `ideas_message` (
+  `id` bigint(20) NOT NULL,
+  `conversation_id` bigint(20) NOT NULL,
+  `sender_id` bigint(20) NOT NULL,
+  `subject_override` varchar(255) NOT NULL DEFAULT '',
+  `text` longtext NOT NULL,
+  `timestamp` datetime(6) NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `is_reported` tinyint(1) NOT NULL DEFAULT 0,
+  `folder` varchar(20) NOT NULL DEFAULT 'inbox',
+  `attachment` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ideas_messagereaction`
+--
+
+CREATE TABLE `ideas_messagereaction` (
+  `id` bigint(20) NOT NULL,
+  `emoji` varchar(10) NOT NULL,
+  `reacted_at` datetime(6) NOT NULL,
+  `message_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -373,6 +482,14 @@ ALTER TABLE `auth_group_permissions`
 ALTER TABLE `auth_permission`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`);
+
+--
+-- Indexes for table `conversation`
+--
+ALTER TABLE `conversation`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ideas_conversation_user1_id_fk` (`user1_id`),
+  ADD KEY `ideas_conversation_user2_id_fk` (`user2_id`);
 
 --
 -- Indexes for table `django_admin_log`
@@ -409,6 +526,14 @@ ALTER TABLE `ideas_comment`
   ADD PRIMARY KEY (`id`),
   ADD KEY `ideas_comment_idea_id_0ab5ade0_fk_ideas_idea_id` (`idea_id`),
   ADD KEY `ideas_comment_user_id_fede6dcd_fk_ideas_customuser_id` (`user_id`);
+
+--
+-- Indexes for table `ideas_conversation`
+--
+ALTER TABLE `ideas_conversation`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_convo_user1` (`user1_id`),
+  ADD KEY `idx_convo_user2` (`user2_id`);
 
 --
 -- Indexes for table `ideas_customuser`
@@ -467,6 +592,22 @@ ALTER TABLE `ideas_like`
   ADD KEY `ideas_like_user_id_c06e7c17_fk_ideas_customuser_id` (`user_id`);
 
 --
+-- Indexes for table `ideas_message`
+--
+ALTER TABLE `ideas_message`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ideas_message_conversation_id_fk` (`conversation_id`),
+  ADD KEY `ideas_message_sender_id_fk` (`sender_id`);
+
+--
+-- Indexes for table `ideas_messagereaction`
+--
+ALTER TABLE `ideas_messagereaction`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ideas_messagereaction_message_id_user_id_emoji_3b035dab_uniq` (`message_id`,`user_id`,`emoji`),
+  ADD KEY `ideas_messagereaction_user_id_0a6dab87_fk_ideas_customuser_id` (`user_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -486,7 +627,13 @@ ALTER TABLE `auth_group_permissions`
 -- AUTO_INCREMENT for table `auth_permission`
 --
 ALTER TABLE `auth_permission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+
+--
+-- AUTO_INCREMENT for table `conversation`
+--
+ALTER TABLE `conversation`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `django_admin_log`
@@ -498,13 +645,13 @@ ALTER TABLE `django_admin_log`
 -- AUTO_INCREMENT for table `django_content_type`
 --
 ALTER TABLE `django_content_type`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `django_migrations`
 --
 ALTER TABLE `django_migrations`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `ideas_comment`
@@ -513,10 +660,16 @@ ALTER TABLE `ideas_comment`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `ideas_conversation`
+--
+ALTER TABLE `ideas_conversation`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `ideas_customuser`
 --
 ALTER TABLE `ideas_customuser`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `ideas_customuser_groups`
@@ -546,13 +699,25 @@ ALTER TABLE `ideas_idea`
 -- AUTO_INCREMENT for table `ideas_idea_starred_by`
 --
 ALTER TABLE `ideas_idea_starred_by`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `ideas_like`
 --
 ALTER TABLE `ideas_like`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `ideas_message`
+--
+ALTER TABLE `ideas_message`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `ideas_messagereaction`
+--
+ALTER TABLE `ideas_messagereaction`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -572,6 +737,13 @@ ALTER TABLE `auth_permission`
   ADD CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`);
 
 --
+-- Constraints for table `conversation`
+--
+ALTER TABLE `conversation`
+  ADD CONSTRAINT `ideas_conversation_user1_id_fk` FOREIGN KEY (`user1_id`) REFERENCES `ideas_customuser` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `ideas_conversation_user2_id_fk` FOREIGN KEY (`user2_id`) REFERENCES `ideas_customuser` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `django_admin_log`
 --
 ALTER TABLE `django_admin_log`
@@ -584,6 +756,13 @@ ALTER TABLE `django_admin_log`
 ALTER TABLE `ideas_comment`
   ADD CONSTRAINT `ideas_comment_idea_id_0ab5ade0_fk_ideas_idea_id` FOREIGN KEY (`idea_id`) REFERENCES `ideas_idea` (`id`),
   ADD CONSTRAINT `ideas_comment_user_id_fede6dcd_fk_ideas_customuser_id` FOREIGN KEY (`user_id`) REFERENCES `ideas_customuser` (`id`);
+
+--
+-- Constraints for table `ideas_conversation`
+--
+ALTER TABLE `ideas_conversation`
+  ADD CONSTRAINT `fk_convo_user1` FOREIGN KEY (`user1_id`) REFERENCES `ideas_customuser` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_convo_user2` FOREIGN KEY (`user2_id`) REFERENCES `ideas_customuser` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `ideas_customuser_groups`
@@ -625,6 +804,20 @@ ALTER TABLE `ideas_idea_starred_by`
 ALTER TABLE `ideas_like`
   ADD CONSTRAINT `ideas_like_idea_id_435284e5_fk_ideas_idea_id` FOREIGN KEY (`idea_id`) REFERENCES `ideas_idea` (`id`),
   ADD CONSTRAINT `ideas_like_user_id_c06e7c17_fk_ideas_customuser_id` FOREIGN KEY (`user_id`) REFERENCES `ideas_customuser` (`id`);
+
+--
+-- Constraints for table `ideas_message`
+--
+ALTER TABLE `ideas_message`
+  ADD CONSTRAINT `ideas_message_conversation_id_fk` FOREIGN KEY (`conversation_id`) REFERENCES `conversation` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `ideas_message_sender_id_fk` FOREIGN KEY (`sender_id`) REFERENCES `ideas_customuser` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `ideas_messagereaction`
+--
+ALTER TABLE `ideas_messagereaction`
+  ADD CONSTRAINT `ideas_messagereaction_message_id_cf7c1ac9_fk_ideas_message_id` FOREIGN KEY (`message_id`) REFERENCES `ideas_message` (`id`),
+  ADD CONSTRAINT `ideas_messagereaction_user_id_0a6dab87_fk_ideas_customuser_id` FOREIGN KEY (`user_id`) REFERENCES `ideas_customuser` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
