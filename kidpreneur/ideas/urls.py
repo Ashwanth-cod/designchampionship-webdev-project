@@ -8,23 +8,19 @@ urlpatterns = [
     path("about/", views.about_view, name="about"),
     path("contact/", views.contact_view, name="contact"),
 
-    # Search
     path("explore/", views.search_page, name="search"),
     path("search/api/", views.search_api, name="search_api"),
 
-    # Dashboard / Profile
     path("dashboard/", views.dashboard_view, name="dashboard"),
     path('save-theme/', views.save_user_theme, name='save_user_theme'),
     path("people/update/", views.user_update, name="user_update"),
     path("people/<str:username>/", views.profile_view, name="user-profile"),
     path("follow/<str:username>/", views.toggle_follow, name="toggle_follow"),
 
-    # Auth
     path("signup/", views.signup_view, name="signup"),
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
 
-    # Ideas
     path("idea/create/", views.idea_create, name="idea_create"),
     path("idea/archived", views.archived_idea, name="archived_idea"),
     path('idea/action/', views.idea_action, name='idea_action'),

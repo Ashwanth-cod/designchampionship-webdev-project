@@ -173,9 +173,10 @@ class ContactMessage(models.Model):
 
 
 # -------------------------
-# Messaging Models
+# Messaging Models (Email-like)
 # -------------------------
 class Conversation(models.Model):
+    subject = models.CharField(max_length=255, default="(No Subject)")
     user1 = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="conversations_as_user1"
     )
@@ -189,42 +190,58 @@ class Conversation(models.Model):
         unique_together = (("user1", "user2"),)
 
     def save(self, *args, **kwargs):
+        # Ensure consistent ordering of participants
         if self.user1.id > self.user2.id:
             self.user1, self.user2 = self.user2, self.user1
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Conversation between {self.user1.username} and {self.user2.username}"
+        return f"{self.subject} ({self.user1.username} & {self.user2.username})"
+
 
 class Message(models.Model):
+    FOLDER_CHOICES = [
+        ("inbox", "Inbox")
+    ]
+
     conversation = models.ForeignKey(
         Conversation, on_delete=models.CASCADE, related_name="messages"
     )
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    subject_override = models.CharField(max_length=255, blank=True)  # e.g. "Re: ..."
     text = models.TextField(blank=True)
     attachment = models.FileField(upload_to="message_attachments/", blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
     is_reported = models.BooleanField(default=False)
+    folder = models.CharField(max_length=20, choices=FOLDER_CHOICES, default="inbox")
 
     class Meta:
-        ordering = ["timestamp"]
+        ordering = ["-timestamp"]
 
     def __str__(self):
-        return f"Message from {self.sender.username} at {self.timestamp}"
+        return f"{self.subject_override or self.conversation.subject} from {self.sender.username}"
 
     def mark_as_read(self):
         self.is_read = True
         self.save()
 
-    def reply(self, user, text):
+    def mark_as_unread(self):
+        self.is_read = False
+        self.save()
+
+    def reply(self, user, text, subject=None):
+        """Reply to this message in the same conversation."""
         if self.sender == user:
             return None
         return Message.objects.create(
             conversation=self.conversation,
             sender=user,
-            text=text
+            text=text,
+            subject_override=subject or f"Re: {self.subject_override or self.conversation.subject}",
+            folder="sent"
         )
+
 
 class MessageReaction(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reactions")

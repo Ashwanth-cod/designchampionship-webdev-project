@@ -24,6 +24,16 @@ body {
   padding: 0 16px;
 }
 
+
+.theme-yellow { background: #fffbea; color: #664d03; }
+.theme-blue { background: #e7f1ff; color: #084298; }
+.theme-green { background: #e9f7ef; color: #0f5132; }
+.theme-pink { background: #fde2e9; color: #702459; }
+.theme-purple { background: #f3e8ff; color: #4a148c; }
+.theme-orange { background: #fff4e5; color: #7c2d12; }
+.theme-danger { background: #f8d7da; color: #842029; }
+
+
 /* ---------------- Base Card ---------------- */
 .card-custom {
   background: var(--card);
@@ -181,3 +191,5 @@ body {
 }
 
 .empty { text-align:center; padding:24px 0; color:var(--muted); font-weight:700; }
+
+/* dashboard.html pages's css  */

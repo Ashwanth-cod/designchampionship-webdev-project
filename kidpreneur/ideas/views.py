@@ -2,16 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, get_user_model, authenticate
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from .forms import MessageForm, MessageReportForm
-from .models import Conversation, Message, MessageReport
+from .models import Conversation, Message
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.http import JsonResponse
+from .utils import get_or_create_conversation
 from django.db.models import Count, Q
 import json
-from .models import Idea, Comment, Like, Follow, CustomUser
-from .forms import CustomUserCreationForm, IdeaForm, UserUpdateForm, LoginForm, ContactForm
+from .models import Idea, Comment, Like, Follow, CustomUser, Conversation
+from .forms import CustomUserCreationForm, IdeaForm, UserUpdateForm, LoginForm, ContactForm, MessageForm, MessageReportForm
 
 User = get_user_model()
 
@@ -166,10 +166,7 @@ def contact_view(request):
         form = ContactForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Your message has been successfully sent!')
             return redirect('contact')
-        else:
-            messages.error(request, 'There was an error with your submission.')
     else:
         initial_data = {}
         if request.user.is_authenticated:
@@ -184,91 +181,169 @@ def contact_view(request):
 # --------------------------
 # Dashboard & Profile
 # --------------------------
+
 @login_required(login_url='/login/')
 def dashboard_view(request):
     user = request.user
 
+    # -------------------------
     # Ideas
+    # -------------------------
     ideas = Idea.objects.filter(created_by=user, is_archived=False)
     starred_ideas = user.starred_ideas.filter(is_archived=False)
     archived_ideas = Idea.objects.filter(created_by=user, is_archived=True)
     total_likes = sum(idea.likes.count() for idea in ideas)
 
+    # -------------------------
     # Followers & Following
-    followers = [f.follower for f in user.followers.select_related('follower').all()]
-    following = [f.following for f in user.following.select_related('following').all()]
+    # -------------------------
+    followers = [f.follower for f in user.followers.select_related('follower')]
+    following = [f.following for f in user.following.select_related('following')]
 
+    # -------------------------
     # Theme colors for UI
+    # -------------------------
     theme_colors = ["yellow", "blue", "green", "pink", "purple", "orange", "danger"]
 
-    # Conversations
-    conversations = Conversation.objects.filter(user1=user) | Conversation.objects.filter(user2=user)
-    conversations = conversations.distinct()
+    # -------------------------
+    # Conversations (single query, annotated)
+    # -------------------------
+    conversations = (
+        Conversation.objects
+        .filter(Q(user1=user) | Q(user2=user))
+        .select_related('user1', 'user2')
+        .annotate(
+            unread_count=Count(
+                'messages',
+                filter=Q(messages__is_read=False) & ~Q(messages__sender=user)
+            )
+        )
+        .distinct()
+    )
 
-    # Messages per conversation
+    # -------------------------
+    # Email-like folders
+    # -------------------------
+    inbox_messages = Message.objects.filter(
+        folder="inbox",
+        conversation__in=conversations
+    ).exclude(sender=user).select_related('sender', 'conversation')
+
+    sent_messages = Message.objects.filter(
+        folder="sent",
+        sender=user
+    ).select_related('sender', 'conversation')
+
+    archived_messages = Message.objects.filter(
+        folder="archived",
+        conversation__in=conversations
+    ).select_related('sender', 'conversation')
+
+    # -------------------------
+    # Messages per conversation (for thread view)
+    # -------------------------
     conversation_messages = {
         convo.id: convo.messages.select_related('sender').order_by('timestamp')
         for convo in conversations
     }
 
+    # -------------------------
     # Unread counts
+    # -------------------------
     unread_counts = {
-        convo.id: convo.messages.filter(is_read=False).exclude(sender=user).count()
-        for convo in conversations
+        convo.id: convo.unread_count for convo in conversations
     }
 
-    # Mark messages as read
+    # -------------------------
+    # Mark all messages in opened conversations as read
+    # -------------------------
     for convo in conversations:
         convo.messages.filter(is_read=False).exclude(sender=user).update(is_read=True)
 
+    # -------------------------
     # Forms
+    # -------------------------
     profile_update_form = UserUpdateForm(instance=user)
     message_form = MessageForm()
     report_form = MessageReportForm()
 
-    # Handle profile update
-    if request.method == 'POST' and 'profile_update_form' in request.POST:
-        profile_update_form = UserUpdateForm(request.POST, instance=user)
-        if profile_update_form.is_valid():
-            profile_update_form.save()
-            messages.success(request, 'Your profile has been updated!')
-            return redirect('dashboard')
+    stats = [
+    ("Total Ideas", "bi-lightbulb-fill", len(ideas)),
+    ("Starred", "bi-star-fill", len(starred_ideas)),
+    ("Archived", "bi-archive-fill", len(archived_ideas)),
+    ("Total Likes", "bi-hand-thumbs-up-fill", total_likes),
+    ]
 
-    # Handle sending a message
-    if request.method == 'POST' and 'send_message_form' in request.POST:
-        conversation_id = request.POST.get('conversation_id')
-        conversation = get_object_or_404(Conversation, id=conversation_id)
 
-        if user not in [conversation.user1, conversation.user2]:
-            return redirect('dashboard')
+    # -------------------------
+    # Handle POST actions
+    # -------------------------
+    if request.method == 'POST':
+        if 'profile_update_form' in request.POST:
+            profile_update_form = UserUpdateForm(request.POST, instance=user)
+            if profile_update_form.is_valid():
+                profile_update_form.save()
+                return redirect('dashboard')
 
-        message_form = MessageForm(request.POST, request.FILES)
-        if message_form.is_valid():
-            message = message_form.save(commit=False)
-            message.sender = user
-            message.conversation = conversation
-            message.save()
-            messages.success(request, 'Your message has been sent!')
-            return redirect('dashboard')
+        elif 'send_message_form' in request.POST:
+            conversation_id = request.POST.get('conversation_id')
+            subject = request.POST.get('subject', '').strip()
 
-    # Handle reporting a message
-    if request.method == 'POST' and 'report_message_form' in request.POST:
-        message_id = request.POST.get('message_id')
-        message = get_object_or_404(Message, id=message_id)
+            if conversation_id:
+                conversation = get_object_or_404(Conversation, id=conversation_id)
+            else:
+                recipient_id = request.POST.get('recipient_id')
+                if not recipient_id:
+                    messages.error(request, 'Recipient is required for a new conversation.')
+                    return redirect('dashboard')
+                recipient = get_object_or_404(CustomUser, id=recipient_id)
+                conversation = get_or_create_conversation(user, recipient)
+                if subject:
+                    conversation.subject = subject
+                    conversation.save()
 
-        if user == message.sender:
-            return redirect('dashboard')
+            if user not in [conversation.user1, conversation.user2]:
+                return redirect('dashboard')
 
-        report_form = MessageReportForm(request.POST)
-        if report_form.is_valid():
-            report = report_form.save(commit=False)
-            report.message = message
-            report.reported_by = user
-            report.save()
-            message.is_reported = True
-            message.save()
-            messages.success(request, 'Your report has been submitted!')
-            return redirect('dashboard')
+            message_form = MessageForm(request.POST, request.FILES)
+            if message_form.is_valid():
+                message = message_form.save(commit=False)
+                message.sender = user
+                message.conversation = conversation
+                message.folder = "sent"
+                if subject:
+                    message.subject_override = subject
+                message.save()
+
+                # Create inbox copy for recipient
+                recipient = conversation.user1 if conversation.user2 == user else conversation.user2
+                Message.objects.create(
+                    conversation=conversation,
+                    sender=user,
+                    text=message.text,
+                    attachment=message.attachment,
+                    subject_override=message.subject_override,
+                    folder="inbox"
+                )
+
+                return redirect('dashboard')
+
+        elif 'report_message_form' in request.POST:
+            message_id = request.POST.get('message_id')
+            message = get_object_or_404(Message, id=message_id)
+
+            if user == message.sender:
+                return redirect('dashboard')
+
+            report_form = MessageReportForm(request.POST)
+            if report_form.is_valid():
+                report = report_form.save(commit=False)
+                report.message = message
+                report.reported_by = user
+                report.save()
+                message.is_reported = True
+                message.save()
+                return redirect('dashboard')
 
     context = {
         'ideas': ideas,
@@ -284,6 +359,10 @@ def dashboard_view(request):
         'conversations': conversations,
         'conversation_messages': conversation_messages,
         'unread_counts': unread_counts,
+        'inbox_messages': inbox_messages,
+        'sent_messages': sent_messages,
+        'archived_messages': archived_messages,
+        "stats": stats,
     }
 
     return render(request, 'dashboard.html', context)
