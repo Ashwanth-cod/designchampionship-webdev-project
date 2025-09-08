@@ -181,7 +181,6 @@ def contact_view(request):
 # --------------------------
 # Dashboard & Profile
 # --------------------------
-
 @login_required(login_url='/login/')
 def dashboard_view(request):
     user = request.user
@@ -197,8 +196,20 @@ def dashboard_view(request):
     # -------------------------
     # Followers & Following
     # -------------------------
-    followers = [f.follower for f in user.followers.select_related('follower')]
-    following = [f.following for f in user.following.select_related('following')]
+    followers = user.followers.select_related('follower')
+    following = user.following.select_related('following')
+    mutual_followers = set(f.follower for f in followers) & set(f.following for f in following)
+
+    # Prepare a list of followers with their status
+    followers_info = []
+    for f in followers:
+        is_mutual = f.follower in mutual_followers
+        is_following_back = f.follower in following
+        followers_info.append({
+            'follower': f.follower,
+            'is_mutual': is_mutual,
+            'is_following_back': is_following_back
+        })
 
     # -------------------------
     # Theme colors for UI
@@ -268,12 +279,11 @@ def dashboard_view(request):
     report_form = MessageReportForm()
 
     stats = [
-    ("Total Ideas", "bi-lightbulb-fill", len(ideas)),
-    ("Starred", "bi-star-fill", len(starred_ideas)),
-    ("Archived", "bi-archive-fill", len(archived_ideas)),
-    ("Total Likes", "bi-hand-thumbs-up-fill", total_likes),
+        ("Total Ideas", "bi-lightbulb-fill", len(ideas)),
+        ("Starred", "bi-star-fill", len(starred_ideas)),
+        ("Archived", "bi-archive-fill", len(archived_ideas)),
+        ("Total Likes", "bi-hand-thumbs-up-fill", total_likes),
     ]
-
 
     # -------------------------
     # Handle POST actions
@@ -345,13 +355,16 @@ def dashboard_view(request):
                 message.save()
                 return redirect('dashboard')
 
+    # -------------------------
+    # Add to Context
+    # -------------------------
     context = {
         'ideas': ideas,
         'starred_ideas': starred_ideas,
         'archived_ideas': archived_ideas,
         'total_likes': total_likes,
         'theme_colors': theme_colors,
-        'followers': followers,
+        'followers_info': followers_info,
         'following': following,
         'profile_update_form': profile_update_form,
         'message_form': message_form,
@@ -363,6 +376,7 @@ def dashboard_view(request):
         'sent_messages': sent_messages,
         'archived_messages': archived_messages,
         "stats": stats,
+        "mutual_followers": mutual_followers,
     }
 
     return render(request, 'dashboard.html', context)

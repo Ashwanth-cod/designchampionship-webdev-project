@@ -242,17 +242,6 @@ class Message(models.Model):
             folder="sent"
         )
 
-
-class MessageReaction(models.Model):
-    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reactions")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    emoji = models.CharField(max_length=10)
-    reacted_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ("message", "user", "emoji")
-
-
 class MessageReport(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reports")
     reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
