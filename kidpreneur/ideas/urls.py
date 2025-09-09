@@ -28,6 +28,10 @@ urlpatterns = [
     path("idea/<slug:slug>/edit/", views.idea_update, name="idea_update"),
     path("idea/<slug:slug>/delete/", views.idea_delete, name="idea_delete"),
     path("idea/<slug:slug>/star/", views.toggle_star, name="toggle_star"),
+
+    path("forum/create", views.forum_post_create, name="forum_create"),
+    path('forum/<slug:slug>/like/', views.forum_toggle_like, name='toggle_like_forum'),
+    path('forum/<slug:slug>/', views.forum_post_detail, name='forum_post_detail'),
 ]
 
 if settings.DEBUG:

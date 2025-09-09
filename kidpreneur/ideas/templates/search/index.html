@@ -44,6 +44,7 @@
   .idea-card-gen{ background: #f8d7da;  color:black; }
   .users-card-gen{ background: #fff3cd; color:black; }
   .cate-card-gen{ background: #cfe2ff;  color:black; }
+  .post-card-gen{ background: #e2f0d9; color:black; }
 
   .sort-select {
     margin-left: auto;
@@ -56,12 +57,11 @@
   }
 
   .description {
-  display: -webkit-box;
-  -webkit-line-clamp: 3; /* limits to 3 lines */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* limits to 3 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
   .tab-panel { min-height: 120px; }
   .cards-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 20px; }
@@ -78,6 +78,7 @@
     <button class="tab-btn red is-active" data-tab="creations">Creations</button>
     <button class="tab-btn yellow" data-tab="users">People</button>
     <button class="tab-btn blue" data-tab="categories">Categories</button>
+    <button class="tab-btn post-btn" data-tab="forum_posts">Forum Posts</button>
     <select id="sort-select" class="sort-select"></select>
     <span><select id="sort-order" class="sort-select">
         <option value="asc">Ascending</option>
@@ -90,7 +91,6 @@
     <p class="empty">Loading…</p>
   </section>
 </div>
-
 
 <script>
   const searchInput = document.getElementById("search-input");
@@ -117,6 +117,10 @@
       { value: "count", label: "Most creations" },
       { value: "alpha", label: "A–Z" }
     ],
+    forum_posts: [
+      { value: "recent", label: "Most Recent" },
+      { value: "title", label: "Title A–Z" }
+    ]
   };
 
   function updateSortOptions() {
@@ -189,67 +193,35 @@
               <span>${idea.likes} likes</span>
             </div>
           </article>
+        </a>
         `).join("")
-      }</div>
-      </a>`;
+      }</div>`;
     } 
     else if (activeTab === "users") {
-  results.innerHTML = `
-  <style>
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      results.innerHTML = `<div class="cards-grid">${
+        data.map(u => {
+          const profileUrl = u.username === currentUser ? "/dashboard/" : `/people/${u.username}/`;
+          return `
+          <a href="${profileUrl}">
+            <article class="card-custom users-card-gen">
+              <h3>@${u.username || "Unknown"}</h3>
+              <p>${u.first_name || ""} ${u.last_name || ""}</p>
+              <small>${u.email || ""}</small>
+            </article>
+          </a>
+          `;
+        }).join("")
+      }</div>`;
     }
-    .card-custom {
-      border: 1px solid #ccc;
-      padding: 12px;
-      border-radius: 8px; 
-      text-align: center;
-      transition: box-shadow 0.3s ease;
-      box-sizing: border-box;
-    }
-    .card-custom:hover {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .users-card-gen h3 {
-      margin: 0 0 8px;
-    }
-    .users-card-gen p,
-    .users-card-gen small {
-      margin: 0;
-    }
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-  </style>
-  <div class="cards-grid">${
-    data.map(u => {
-      const profileUrl = u.username === currentUser ? "/dashboard/" : `/people/${u.username}/`;
-      return `
-      <a href="${profileUrl}">
-        <article class="card-custom users-card-gen">
-          <h3>@${u.username || "Unknown"}</h3>
-          <p>${u.first_name || ""} ${u.last_name || ""}</p>
-          <small>${u.email || ""}</small>
-        </article>
-      </a>
-      `;
-    }).join("")
-  }</div>`;
-}
-
     else if (activeTab === "categories") {
       results.innerHTML = `<div class="cards-grid">${
         data.map(c => `
-          <article class="card-custom category-card cate-card-gen" data-category="${c.category}">
-            <h3>${c.category}</h3>
-            <p>${c.count} creations</p>
-          </article>
+        <article class="card-custom category-card cate-card-gen" data-category="${c.category}">
+          <h3>${c.category}</h3>
+          <p>${c.count} creations</p>
+        </article>
         `).join("")
       }</div>`;
-
       document.querySelectorAll(".category-card").forEach(card => {
         card.addEventListener("click", () => {
           activeTab = "creations";
@@ -262,6 +234,21 @@
         });
       });
     }
+    else if (activeTab === "forum_posts") {
+      results.innerHTML = `<div class="cards-grid">${
+        data.map(post => `
+        <a href="/forum/${post.title}/" style="text-decoration:none;">
+          <article class="card-custom post-card-gen">
+            <h3>${post.title}</h3>
+            <p class="description">${post.content || "No content available."}</p>
+            <div class="meta">
+              <span>Category: ${post.category}</span>
+            </div>
+          </article>
+        </a>
+        `).join("")
+      }</div>`;
+    }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -271,3 +258,4 @@
 </script>
 
 {% endblock %}
+  

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title|slice:":20" }} - Forum Post{% endblock %}
+{% block content %}
+{% load humanize %}
+
+<style>
+  .forum-post-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .card-custom {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card-custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+
+  .likes button {
+    width: 100%;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.25s ease-in-out;
+  }
+
+  .post-description {
+    white-space: pre-line;
+  }
+
+  /* Modal Image & Doc Styles */
+  .modal-content img, .modal-content iframe {
+    width: 100%;
+    height: auto;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+</style>
+
+<!-- MAIN CONTENT -->
+<div class="forum-post-container">
+  <!-- LEFT SIDE -->
+  <div>
+    <div class="card-custom description">
+      <h2>{{ post.title }}</h2>
+      <p class="post-description">{{ post.content }}</p>
+
+      {% if post.image or post.document %}
+      <div id="postCarousel" class="carousel slide mt-4" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          {% if post.image %}
+          <div class="carousel-item active">
+            <img src="{{ post.image.url }}" class="d-block w-100"
+              style="max-height: 500px; object-fit: cover; border-radius: 12px; cursor: pointer;"
+              data-bs-toggle="modal" data-bs-target="#mediaModal"
+              data-type="image" data-src="{{ post.image.url }}">
+          </div>
+          {% endif %}
+
+          {% if post.document %}
+          <div class="carousel-item {% if not post.image %}active{% endif %}">
+            <div class="d-flex justify-content-center align-items-center"
+              style="height: 300px; background: #f8f9fa; cursor: pointer;"
+              data-bs-toggle="modal" data-bs-target="#mediaModal"
+              data-type="document"
+              data-src="{{ post.document.url }}"
+              data-extension="{{ post.document.url|lower|slice:'-4:' }}">
+              <div class="text-center">
+                <i class="bi bi-file-earmark-text" style="font-size: 4rem;"></i><br>
+                <strong>{{ post.document.name|cut:"forum_documents/" }}</strong>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if post.image and post.document %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#postCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <br><br>
+
+    <div class="card-custom author">
+      <p>
+        By <strong>
+          {% if post.created_by == request.user %}
+          <a href="{% url 'dashboard' %}" style="text-decoration:none;">
+            {{ post.created_by.username }}
+          </a>
+          {% else %}
+            {{ post.created_by.username }}
+          </a>
+          {% endif %}
+        </strong><br>
+        <small>{{ post.created_at|date:"M d, Y" }}</small>
+      </p>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div>
+    <div class="card-custom likes mb-3">
+        <form method="post" action="{% url 'toggle_like_forum' forum_post.slug %}">
+            {% csrf_token %}
+            <button type="submit" class="btn {% if user_liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                {% if user_liked %}💔 Unlike{% else %}❤️ Like{% endif %}
+                {{ like_count }}
+            </button>
+        </form>
+
+      <form method="post" class="report">
+        {% csrf_token %}
+        <button name="report_toggle" value="1" class="btn btn-warning">
+          🚩 Report
+        </button>
+      </form>
+    </div>
+
+    <div class="card-custom comments">
+      <h4>Comments</h4>
+      <form method="post" class="mb-3">
+        {% csrf_token %}
+        <textarea name="comment_text" class="form-control mb-2" placeholder="Add a comment..."></textarea>
+        <button type="submit" class="btn btn-success">Submit</button>
+      </form>
+      {% for comment in comments %}
+      <div class="comment-item">   
+        <strong>
+          {% if comment.user == request.user %}
+          <a href="{% url 'dashboard' %}" style="text-decoration:none;">
+            {{ comment.user.username }}
+          </a>
+          {% else %}
+          <a href="{% url 'user-profile' comment.user.username %}" style="text-decoration:none;">
+            {{ comment.user.username }}
+          </a>
+          {% endif %}
+        </strong>
+        <small class="text-muted"> • {{ comment.created_at|naturaltime }}</small>
+        <p class="mb-0">{{ comment.text }}</p>
+      </div>
+      {% empty %}
+      <p class="text-muted">No comments yet.</p>  
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR IMAGE & DOCUMENT -->
+<div class="modal fade" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-body" id="modalBodyContent" style="text-align:center;">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOTSTRAP ICONS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<!-- BOOTSTRAP JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- MODAL SCRIPT -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const modalBody = document.getElementById("modalBodyContent");
+    const mediaItems = document.querySelectorAll("[data-bs-toggle='modal'][data-bs-target='#mediaModal']");
+
+    mediaItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const type = item.getAttribute("data-type");
+        const src = item.getAttribute("data-src");
+        const extension = (item.getAttribute("data-extension") || "").toLowerCase();
+
+        if (type === "image") {
+          modalBody.innerHTML = `<img src="${src}" alt="Full Image" style="max-width: 100%; max-height: 90vh; border-radius: 10px;">`;
+        } else if (type === "document") {
+          if (extension === ".pdf") {
+            modalBody.innerHTML = `<iframe src="${src}" style="width: 100%; height: 80vh;" frameborder="0"></iframe>`;
+          } else if (extension === ".txt") {
+            fetch(src)
+              .then(res => res.text())
+              .then(text => {
+                modalBody.innerHTML = `<pre style="text-align:left; max-height: 80vh; overflow-y:auto;">${text}</pre>`;
+              });
+          } else if (extension === ".docx" || extension === ".doc") {
+            modalBody.innerHTML = `
+              <a href="${src}" target="_blank" class="btn btn-primary mb-3">Open Document in New Tab</a>
+              <p><em>Preview not supported for DOC/DOCX files directly. Use the button above.</em></p>
+            `;
+          } else {
+            modalBody.innerHTML = `<p>Unsupported document format.</p>`;
+          }
+        }
+      });
+    });
+  });
+</script>
+
+{% endblock %}

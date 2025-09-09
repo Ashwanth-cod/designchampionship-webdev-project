@@ -1,453 +1,470 @@
-  {% extends "base.html" %}
-  {% load static %}
-  {% load custom_tags %}
+{% extends "base.html" %}
+{% load static %}
+{% load custom_tags %}
 
-  {% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
-  {% block extra_head %}
-  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    /* Core card styling */
-    .card-custom {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      background-color: #fff;
-      box-sizing: border-box;
-      width: 100%;
-      transition: all 0.2s ease-in-out;
-    }
-
-    /* Idea card layout */
-    .idea-card {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      height: 100%;
-    }
-
-    .ideabtn {
-      border-radius: 10px;
-      border: 2px solid white;
-    }
-
-    @media (max-width: 576px) {
-      .card-custom h2 { font-size: 1.2rem; }
-      .card-custom p { font-size: 0.9rem; }
-    }
-
-    /* Profile styling */
-    .user-avatar img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    .user-details h5 { margin:0; font-size:1.1rem; }
-    .user-details p { margin:0; }
-    .user-details .text-muted { font-size:0.9rem; }
-    .user-details .text-success { color:#28a745 !important; }
-    .user-details .text-danger { color:#dc3545 !important; }
-
-    
-  /* For profile cards, ensure content stretches */
-  .user-details {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 500px;
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  /* Core card styling */
+  .card-custom {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #fff;
+    box-sizing: border-box;
+    width: 100%;
+    transition: all 0.2s ease-in-out;
   }
 
-  /* Ensure buttons stay at bottom of idea cards */
+  /* Idea card layout */
   .idea-card {
-      margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
   }
 
-  </style>
-  {% endblock %}
+  .ideabtn {
+    border-radius: 10px;
+    border: 2px solid white;
+  }
 
-  {% block content %}
-  <div id="dashboardContainer" class="dashboard-container d-flex">
-    <!-- Side Tabs -->
-    <div class="tab-section">
-      <div class="tab-scroll-wrapper">
-        <ul class="nav nav-tabs flex-column" role="tablist" aria-orientation="vertical">
-          <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ideas" role="tab" title="My Ideas">💡</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#starred" role="tab" title="Starred Ideas">⭐</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#archived" role="tab" title="Archived Ideas">🗂️</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#create" role="tab" title="Create Idea">➕</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile" role="tab" title="Profile">👤</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#messages" role="tab" title="Messages">💬</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#theme" role="tab" title="Customize Theme">🎨</button></li>
-        </ul>
-      </div>
+  @media (max-width: 576px) {
+    .card-custom h2 { font-size: 1.2rem; }
+    .card-custom p { font-size: 0.9rem; }
+  }
+
+  /* Profile styling */
+  .user-avatar img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+  }
+
+  .user-details h5 { margin:0; font-size:1.1rem; }
+  .user-details p { margin:0; }
+  .user-details .text-muted { font-size:0.9rem; }
+  .user-details .text-success { color:#28a745 !important; }
+  .user-details .text-danger { color:#dc3545 !important; }
+
+  @media (max-width: 768px) {
+      .user-avatar img { width: 40px; height: 40px; } 
+  }
+  .user-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #000000;
+  height: 100%;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="dashboardContainer" class="dashboard-container d-flex">
+  <!-- Side Tabs -->
+  <div class="tab-section">
+    <div class="tab-scroll-wrapper">
+      <ul class="nav nav-tabs flex-column" role="tablist" aria-orientation="vertical">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ideas" role="tab" title="My Ideas">💡</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#starred" role="tab" title="Starred Ideas">⭐</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#archived" role="tab" title="Archived Ideas">🗂️</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#create" role="tab" title="Create Idea">➕</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile" role="tab" title="Profile">👤</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#messages" role="tab" title="Messages">💬</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#theme" role="tab" title="Customize Theme">🎨</button></li>
+      </ul>
     </div>
+  </div>
 
-    <!-- Main Content -->
-    <div class="content-section flex-grow-1">
-      <div class="tab-content p-3">
+  <!-- Main Content -->
+  <div class="content-section flex-grow-1">
+    <div class="tab-content p-3">
 
-        <!-- My Ideas -->
-        <div class="tab-pane fade show active" id="ideas" role="tabpanel">
-          <h1 class="text-center mb-4">💡 My Ideas</h1>
-          <div class="row">
-            {% for idea in ideas %}
-              <div class="col-12 col-sm-12 col-md-6 col-lg-4 mb-4">
-              <div class="card-custom idea-card h-100 d-flex flex-column">
-                <a href="{% url 'idea-detail' idea.slug %}" class="text-decoration-none text-dark flex-grow-1">
-                  <h2><b>{{ idea.title }}</b></h2>
-                  <p>{{ idea.description|truncatewords:15 }}</p>
-                  <div class="d-flex justify-content-between align-items-center mt-2">
-                    <span>👍 {{ idea.likes.count }}</span>
-                  </div>
-                </a>
-                <div class="mt-3 d-flex gap-2">
-                  <a href="{% url 'idea_update' idea.slug %}" class="btn ideabtn btn-sm btn-primary w-100">Edit</a>
-                  <button class="btn ideabtn btn-sm btn-warning w-100 open-action-modal" data-action="archive" data-id="{{ idea.id }}">Archive</button>
-                  <button class="btn ideabtn btn-sm btn-danger w-100 open-action-modal" data-action="delete" data-id="{{ idea.id }}">Delete</button>
-                </div>
-              </div>
-            </div>
-            
-            {% empty %}<p>No ideas yet.</p>{% endfor %}
-          </div>
-        </div>
-
-        <!-- Starred Ideas -->
-        <div class="tab-pane fade" id="starred" role="tabpanel">
-          <h1 class="text-center mb-4">⭐ Starred Ideas</h1>
-          <div class="row">
-            {% for idea in starred_ideas %}
-            <div class="col-12 col-sm-12 col-md-6 col-lg-4 mb-4">
+      <!-- My Ideas -->
+      <div class="tab-pane fade show active" id="ideas" role="tabpanel">
+        <h1 class="text-center mb-4">💡 My Ideas</h1>
+        <div class="row">
+          {% for idea in ideas %}
+          <div class="col-12 col-sm-12 col-md-6 col-lg-4 mb-4">
+            <div class="card-custom idea-card h-100 d-flex flex-column">
               <a href="{% url 'idea-detail' idea.slug %}" class="text-decoration-none text-dark">
-                <div class="card-custom idea-card h-100">
-                  <h2><b>{{ idea.title }}</b></h2>
-                  <p>{{ idea.description|truncatewords:15 }}</p>
-                  <div class="d-flex justify-content-between align-items-center mt-2">
-                    <small>By <b>{{ idea.created_by.username }}</b> • {{ idea.created_at|date:"M d, Y" }}</small>
-                    <span>👍 {{ idea.likes.count }}</span>
-                  </div>
+                <h2><b>{{ idea.title }}</b></h2>
+                <p>{{ idea.description|truncatewords:15 }}</p>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <span>👍 {{ idea.likes.count }}</span>
                 </div>
               </a>
+              <div class="mt-3 d-flex gap-2">
+                <a href="{% url 'idea_update' idea.slug %}" class="btn ideabtn btn-sm btn-primary w-100">Edit</a>
+                <button class="btn ideabtn btn-sm btn-warning w-100 open-action-modal" data-action="archive" data-id="{{ idea.id }}">Archive</button>
+                <button class="btn ideabtn btn-sm btn-danger w-100 open-action-modal" data-action="delete" data-id="{{ idea.id }}">Delete</button>
+              </div>
             </div>
-            {% empty %}<p>You haven’t starred any ideas yet.</p>{% endfor %}
           </div>
+          {% empty %}<p>No ideas yet.</p>{% endfor %}
         </div>
+      </div>
 
-        <!-- Archived Ideas -->
-        <div class="tab-pane fade" id="archived" role="tabpanel">
-          <h1 class="text-center mb-4">🗂️ Archived Ideas</h1>
-          <div class="row">
-            {% for idea in archived_ideas %}
-            <div class="col-12 col-sm-12 col-md-6 col-lg-4 mb-4">
-              <div class="card-custom idea-card h-100 d-flex flex-column">
+      <!-- Starred Ideas -->
+      <div class="tab-pane fade" id="starred" role="tabpanel">
+        <h1 class="text-center mb-4">⭐ Starred Ideas</h1>
+        <div class="row">
+          {% for idea in starred_ideas %}
+          <div class="col-12 col-sm-12 col-md-6 col-lg-4 mb-4">
+            <a href="{% url 'idea-detail' idea.slug %}" class="text-decoration-none text-dark">
+              <div class="card-custom idea-card h-100">
                 <h2><b>{{ idea.title }}</b></h2>
                 <p>{{ idea.description|truncatewords:15 }}</p>
                 <div class="d-flex justify-content-between align-items-center mt-2">
                   <small>By <b>{{ idea.created_by.username }}</b> • {{ idea.created_at|date:"M d, Y" }}</small>
                   <span>👍 {{ idea.likes.count }}</span>
                 </div>
-                <div class="mt-3 d-flex gap-2">
-                  <button class="btn btn-sm btn-warning w-100 open-action-modal" data-action="unarchive" data-id="{{ idea.id }}">Unarchive</button>
-                  <button class="btn btn-sm btn-danger w-100 open-action-modal" data-action="delete" data-id="{{ idea.id }}">Delete</button>
-                </div>
+              </div>
+            </a>
+          </div>
+          {% empty %}<p>You haven’t starred any ideas yet.</p>{% endfor %}
+        </div>
+      </div>
+
+      <!-- Archived Ideas -->
+      <div class="tab-pane fade" id="archived" role="tabpanel">
+        <h1 class="text-center mb-4">🗂️ Archived Ideas</h1>
+        <div class="row">
+          {% for idea in archived_ideas %}
+          <div class="col-12 col-sm-12 col-md-6 col-lg-4 mb-4">
+            <div class="card-custom idea-card h-100 d-flex flex-column">
+              <h2><b>{{ idea.title }}</b></h2>
+              <p>{{ idea.description|truncatewords:15 }}</p>
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <small>By <b>{{ idea.created_by.username }}</b> • {{ idea.created_at|date:"M d, Y" }}</small>
+                <span>👍 {{ idea.likes.count }}</span>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <button class="btn btn-sm btn-warning w-100 open-action-modal" data-action="unarchive" data-id="{{ idea.id }}">Unarchive</button>
+                <button class="btn btn-sm btn-danger w-100 open-action-modal" data-action="delete" data-id="{{ idea.id }}">Delete</button>
               </div>
             </div>
-            {% empty %}<p>No archived ideas yet.</p>{% endfor %}
           </div>
+          {% empty %}<p>No archived ideas yet.</p>{% endfor %}
         </div>
+      </div>
 
-        <!-- Create Idea -->
-        <div class="tab-pane fade" id="create" role="tabpanel">
-          <h1 class="text-center mb-4">➕ Create New Idea</h1>
-          <a href="{% url 'idea_create' %}" class="create-idea-card text-decoration-none">
-            <div class="card-custom text-center">
-              <h4>Create Your Next Idea</h4>
-              <p>Click here to launch your creativity and share your idea with the world!</p>
+      <!-- Create Idea -->
+      <div class="tab-pane fade" id="create" role="tabpanel">
+        <h1 class="text-center mb-4">➕ Create New Idea</h1>
+        <a href="{% url 'idea_create' %}" class="create-idea-card text-decoration-none">
+          <div class="card-custom text-center">
+            <h4>Create Your Next Idea</h4>
+            <p>Click here to launch your creativity and share your idea with the world!</p>
+          </div>
+        </a>
+      </div>
+
+<!-- Profile Tab -->
+<div class="tab-pane fade" id="profile" role="tabpanel">
+    <h1 class="text-center mb-4">👤 My Profile</h1>
+
+    <!-- Stats -->
+    <div class="row mb-4 text-center">
+        {% for stat_name, stat_icon, stat_value in stats %}
+        <div class="col-6 col-md-3 mb-2">
+            <div class="card-custom p-3">
+                <i class="bi {{ stat_icon }} mb-1" style="font-size:1.5rem;"></i>
+                <h5 class="mb-0"><b>{{ stat_value }}</b></h5>
+                <small>{{ stat_name }}</small>
             </div>
-          </a>
         </div>
-
-  <!-- Profile Tab -->
-  <div class="tab-pane fade" id="profile" role="tabpanel">
-      <h1 class="text-center mb-4">👤 My Profile</h1>
-
-      <!-- Stats -->
-      <div class="row mb-4 text-center">
-          {% for stat_name, stat_icon, stat_value in stats %}
-          <div class="col-6 col-md-3 mb-2">
-              <div class="card-custom p-3">
-                  <i class="bi {{ stat_icon }} mb-1" style="font-size:1.5rem;"></i>
-                  <h5 class="mb-0"><b>{{ stat_value }}</b></h5>
-                  <small>{{ stat_name }}</small>
-              </div>
-          </div>
-          {% endfor %}
-      </div>
-
-      <!-- Update Button -->
-      <div class="text-center mb-3">
-          <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#profileUpdateForm" aria-expanded="false" aria-controls="profileUpdateForm">
-              Update Profile
-          </button>
-      </div>
-
-      <!-- Profile Form (collapsed by default) -->
-      <div class="collapse" id="profileUpdateForm">
-          <div class="card-custom p-3 mb-4">
-              <h2 class="mb-3">Update Profile</h2>
-              <form method="post" enctype="multipart/form-data">
-                  {% csrf_token %}
-                  <input type="hidden" name="profile_update_form" value="1">
-                  {{ profile_update_form.as_p }}
-                  <button type="submit" class="btn btn-success">Save Changes</button>
-              </form>
-          </div>
-      </div>
-
-      <!-- Followers & Following (simplified) -->
-  <div class="row" style="gap: 1rem;">
-<!-- Followers -->
-<div class="col-12 col-md-6 mb-4">
-    <h2 style="margin-bottom:1rem;">Followers</h2>
-    <div class="card-custom">
-        <div class="card-body">
-            {% if followers %}
-                <div>
-                    {% for follower in followers %}
-                        <div style="margin-bottom:1rem;">
-                            <a href="{% url 'user-profile' follower.username %}" style="text-decoration:none; color:inherit;">
-                                <strong>{{ follower.username }}</strong> ({{ follower.email }})<br>
-                                <small>Joined: {{ follower.date_joined|date:"M d, Y" }}</small><br>
-                                <small style="color:{% if follower in following %}#28a745{% else %}#dc3545{% endif %};">
-                                    {% if follower in following %}Mutual Follower{% else %}Not Following Back{% endif %}
-                                </small>
-                            </a>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p>No followers yet.</p>
-            {% endif %}
-        </div>
+        {% endfor %}
     </div>
-</div>
 
+    <!-- Update Button -->
+    <div class="text-center mb-3">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#profileUpdateForm" aria-expanded="false" aria-controls="profileUpdateForm">
+            Update Profile
+        </button>
+    </div>
 
-  </div>
-</div>
-
-
-  </div>
-
-
-        <!-- Messages Tab -->
-        <div class="tab-pane fade" id="messages" role="tabpanel">
-          <h1 class="text-center mb-4">📧 Messages</h1>
-          <div class="d-flex justify-content-end mb-3 sticky-top bg-white py-2">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeModal">✉️ Compose</button>
-          </div>
-
-          {% for convo in conversations %}
-          <div class="card-custom mb-4">
-            <h5 class="mb-2 d-flex justify-content-between align-items-center">
-              <span onclick="toggleThread('{{ convo.id }}')" style="cursor:pointer; font-weight:600;">
-                {% if convo.subject %} {{ convo.subject }} {% else %} (No Subject) {% endif %} — with 
-                {% if convo.user1 == request.user %}
-    {{ convo.user2.username }}
-{% else %}
-    {{ convo.user1.username }}
-{% endif %}
-
-              </span>
-              {% with unread_counts|get_item:convo.id as unread %}
-                {% if unread and unread > 0 %}
-                <span class="badge bg-danger" style="font-size:0.8rem;">{{ unread }} unread</span>
-                {% endif %}
-              {% endwith %}
-            </h5>
-            <div id="thread-{{ convo.id }}" class="thread-content collapse">
-              <div class="chat-box p-3">
-                {% with conversation_messages|get_item:convo.id as messages %}
-                  {% for msg in messages %}
-                  <div class="mb-2 {% if msg.sender == request.user %}text-end{% else %}text-start{% endif %}">
-                    <div class="d-inline-block p-2 rounded {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}" style="width:280px word-wrap:break-word;">
-                      <div class="small fw-bold mb-1">{{ msg.sender.username|default:msg.sender.email }}</div>
-                      {% if msg.subject_override %}<strong>{{ msg.subject_override }}</strong><br>{% endif %}
-                      {{ msg.text|linebreaks }}
-                      {% if msg.attachment %}<br><a href="{{ msg.attachment.url }}" target="_blank">📎 Attachment</a>{% endif %}
-                      <div class="small text-muted mt-1">{{ msg.timestamp|date:"M d, H:i" }}</div>
-                    </div>
-                  </div>
-                  {% empty %}<p class="text-muted m-0">No messages yet.</p>{% endfor %}
-                {% endwith %}
-              </div>
-              <form method="post" enctype="multipart/form-data" class="border-top pt-2">
+    <!-- Profile Form (collapsed by default) -->
+    <div class="collapse" id="profileUpdateForm">
+        <div class="card-custom p-3 mb-4">
+            <h2 class="mb-3">Update Profile</h2>
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="hidden" name="conversation_id" value="{{ convo.id }}">
-                <input type="hidden" name="send_message_form" value="1">
-                <div class="mb-2"><input type="text" name="subject" class="form-control" placeholder="Subject (optional)"></div>
-                <div class="input-group">
-                  {{ message_form.text }}
-                  <input type="file" name="attachment" class="form-control">
-                  <button type="submit" class="btn btn-success">Reply</button>
+                <input type="hidden" name="profile_update_form" value="1">
+                {{ profile_update_form.as_p }}
+                <button type="submit" class="btn btn-success">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Followers & Following (unchanged) -->
+    <div class="row">
+        <!-- Followers -->
+        <div class="col-12 col-md-6 mb-4">
+            <h2>Followers</h2>
+            <div class="row">
+                {% for follower in followers %}
+                
+                <div class="col-12 col-sm-6 col-md-4 mb-3">
+                    <div class="card-custom p-3 d-flex align-items-center">
+                        <div class="user-avatar me-3">
+                            <img src="{% if follower.profile_picture %}{{ follower.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Avatar">
+                        </div>
+                        <div class="user-details">
+                            <h5><b>{{ follower.username }}</b></h5>
+                            <p class="text-muted">{{ follower.email }}</p>
+                            <p class="small text-muted">Joined: {{ follower.date_joined|date:"M d, Y" }}</p>
+                            <p class="small {% if follower in following %}text-success{% else %}text-danger{% endif %}">
+                                {% if follower in following %}Mutual Follower{% else %}Not Following Back{% endif %}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-              </form>
+                {% empty %}<p>No followers yet.</p>{% endfor %}
             </div>
-          </div>
-          {% empty %}<p class="text-muted fst-italic">No conversations yet. Start one now!</p>{% endfor %}
         </div>
 
-        <!-- Theme Tab -->
-        <div class="tab-pane fade" id="theme" role="tabpanel">
-          <h1 class="text-center mb-4">🎨 Customize Theme</h1>
-          <div class="card-custom text-center p-3">
-            <label for="themeSelect"><b>Choose your theme:</b></label>
-            <select id="themeSelect" class="form-select w-100 mt-2">
-              <option value="theme-yellow">Yellow</option>
-              <option value="theme-blue">Blue</option>
-              <option value="theme-green">Green</option>
-              <option value="theme-pink">Pink</option>
-              <option value="theme-purple">Purple</option>
-              <option value="theme-orange">Orange</option>
-            </select>
-          </div>
+        <!-- Following -->
+        <div class="col-12 col-md-6 mb-4">
+            <h2>Following</h2>
+            <div class="row">
+                {% for user in following %}
+                <div class="col-12 col-sm-6 col-md-4 mb-3">
+                    <div class="card-custom p-3 d-flex align-items-center">
+                        <div class="user-avatar me-3">
+                            <img src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Avatar">
+                        </div>
+                        <div class="user-details">
+                            <h5><b>{{ user.username }}</b></h5>
+                            <p class="text-muted">{{ user.email }}</p>
+                            <p class="small text-muted">Joined: {{ user.date_joined|date:"M d, Y" }}</p>
+                            <p class="small {% if user in followers %}text-success{% else %}text-danger{% endif %}">
+                                {% if user in followers %}Mutual Follower{% else %}Not Following Back{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}<p>You are not following anyone yet.</p>{% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+      <!-- Messages Tab -->
+      <div class="tab-pane fade" id="messages" role="tabpanel">
+        <h1 class="text-center mb-4">📧 Messages</h1>
+        <div class="d-flex justify-content-end mb-3 sticky-top bg-white py-2">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeModal">✉️ Compose</button>
         </div>
 
+        {% for convo in conversations %}
+        <div class="card-custom mb-4">
+          <h5 class="mb-2 d-flex justify-content-between align-items-center">
+            <span onclick="toggleThread('{{ convo.id }}')" style="cursor:pointer; font-weight:600;">
+              {% if convo.subject %} {{ convo.subject }} {% else %} (No Subject) {% endif %} — with 
+              {% if convo.user1 == request.user %}
+                {{ convo.user2.username }}
+              {% else %}
+                {{ convo.user1.username }}
+              {% endif %}
+                          
+            </span>
+            {% with unread_counts|get_item:convo.id as unread %}
+              {% if unread and unread > 0 %}
+              <span class="badge bg-danger" style="font-size:0.8rem;">{{ unread }} unread</span>
+              {% endif %}
+            {% endwith %}
+          </h5>
+          <div id="thread-{{ convo.id }}" class="thread-content collapse">
+            <div class="chat-box p-3">
+              {% with conversation_messages|get_item:convo.id as messages %}
+                {% for msg in messages %}
+                <div class="mb-2 {% if msg.sender == request.user %}text-end{% else %}text-start{% endif %}">
+                  <div class="d-inline-block p-2 rounded {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}" style="max-width:80%; word-wrap:break-word;">
+                    <div class="small fw-bold mb-1">{{ msg.sender.username|default:msg.sender.email }}</div>
+                    {% if msg.subject_override %}<strong>{{ msg.subject_override }}</strong><br>{% endif %}
+                    {{ msg.text|linebreaks }}
+                    {% if msg.attachment %}<br><a href="{{ msg.attachment.url }}" target="_blank">📎 Attachment</a>{% endif %}
+                    <div class="small text-muted mt-1">{{ msg.timestamp|date:"M d, H:i" }}</div>
+                  </div>
+                </div>
+                {% empty %}<p class="text-muted m-0">No messages yet.</p>{% endfor %}
+              {% endwith %}
+            </div>
+            <form method="post" enctype="multipart/form-data" class="mt-3 border-top pt-2">
+              {% csrf_token %}
+              <input type="hidden" name="conversation_id" value="{{ convo.id }}">
+              <input type="hidden" name="send_message_form" value="1">
+              <div class="mb-2"><input type="text" name="subject" class="form-control" placeholder="Subject (optional)"></div>
+              <div class="input-group">
+                {{ message_form.text }}
+                <input type="file" name="attachment" class="form-control">
+                <button type="submit" class="btn btn-success">Reply</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        {% empty %}<p class="text-muted fst-italic">No conversations yet. Start one now!</p>{% endfor %}
       </div>
+
+      <!-- Theme Tab -->
+      <div class="tab-pane fade" id="theme" role="tabpanel">
+        <h1 class="text-center mb-4">🎨 Customize Theme</h1>
+        <div class="card-custom text-center p-3">
+          <label for="themeSelect"><b>Choose your theme:</b></label>
+          <select id="themeSelect" class="form-select w-100 mt-2">
+            <option value="theme-yellow">Yellow</option>
+            <option value="theme-blue">Blue</option>
+            <option value="theme-green">Green</option>
+            <option value="theme-pink">Pink</option>
+            <option value="theme-purple">Purple</option>
+            <option value="theme-orange">Orange</option>
+          </select>
+        </div>
+      </div>
+
     </div>
   </div>
+</div>
 
-  <!-- Compose Modal -->
-  <div class="modal fade" id="composeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content shadow">
-        <form method="post" enctype="multipart/form-data">
-          {% csrf_token %}
-          <input type="hidden" name="send_message_form" value="1">
-          <div class="modal-header border-0">
-            <h5 class="modal-title fw-bold">✉️ New Message</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="recipient_id" class="form-label">Recipient</label>
-              <select id="recipient_id" name="recipient_id" class="form-select" required>
-                <option value="" disabled selected>Select recipient</option>
-                {% for user in mutual_followers %}
-                  <option value="{{ user.id }}">{{ user.username|default:user.email }}</option>
-                {% empty %}
-                  <option value="" disabled>No mutual followers available</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="subject" class="form-label">Subject</label>
-              <input type="text" id="subject" name="subject" class="form-control" placeholder="Optional">
-            </div>
-            <div class="mb-3">
-              <label for="message_text" class="form-label">Message</label>
-              <textarea id="message_text" name="text" class="form-control" rows="5" placeholder="Write your message..." required></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="attachment" class="form-label">Attachment</label>
-              <input type="file" id="attachment" name="attachment" class="form-control">
-            </div>
-          </div>
-          <div class="modal-footer border-0">
-            <button type="submit" class="btn btn-success px-4">Send</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Confirm Action Modal -->
-  <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <form id="confirmActionForm" method="post" class="modal-content">
+<!-- Compose Modal -->
+<div class="modal fade" id="composeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content shadow">
+      <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="modal-header"><h5 id="actionModalLabel" class="modal-title">Confirm Action</h5>
+        <input type="hidden" name="send_message_form" value="1">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">✉️ New Message</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body" id="actionModalBody"></div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="recipient_id" class="form-label">Recipient</label>
+            <select id="recipient_id" name="recipient_id" class="form-select" required>
+              <option value="" disabled selected>Select recipient</option>
+              {% for user in mutual_followers %}
+                <option value="{{ user.id }}">{{ user.username|default:user.email }}</option>
+              {% empty %}
+                <option value="" disabled>No mutual followers available</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="subject" class="form-label">Subject</label>
+            <input type="text" id="subject" name="subject" class="form-control" placeholder="Optional">
+          </div>
+          <div class="mb-3">
+            <label for="message_text" class="form-label">Message</label>
+            <textarea id="message_text" name="text" class="form-control" rows="5" placeholder="Write your message..." required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="attachment" class="form-label">Attachment</label>
+            <input type="file" id="attachment" name="attachment" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-success px-4">Send</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
       </form>
     </div>
   </div>
-  {% endblock %}
+</div>
 
-  {% block extra_scripts %}
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const container = document.getElementById("dashboardContainer");
-    const themeSelect = document.getElementById("themeSelect");
-    const savedTheme = localStorage.getItem("dashboardTheme") || "theme-yellow";
-    container.classList.add(savedTheme);
-    themeSelect.value = savedTheme;
+<!-- Confirm Action Modal -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="confirmActionForm" method="post" class="modal-content">
+      {% csrf_token %}
+      <div class="modal-header"><h5 id="actionModalLabel" class="modal-title">Confirm Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="actionModalBody"></div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
 
-    themeSelect.addEventListener("change", () => {
-      Array.from(container.classList).forEach(cls => { if (cls.startsWith("theme-")) container.classList.remove(cls); });
-      container.classList.add(themeSelect.value);
-      localStorage.setItem("dashboardTheme", themeSelect.value);
-    });
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("dashboardContainer");
+  const themeSelect = document.getElementById("themeSelect");
+  const savedTheme = localStorage.getItem("dashboardTheme") || "theme-yellow";
+  container.classList.add(savedTheme);
+  themeSelect.value = savedTheme;
 
-    const actionModal = new bootstrap.Modal(document.getElementById('actionModal'));
-    const confirmActionForm = document.getElementById('confirmActionForm');
-    const actionModalBody = document.getElementById('actionModalBody');
-    const confirmActionBtn = document.getElementById('confirmActionBtn');
-    let currentAction, currentIdeaId;
-
-    document.querySelectorAll(".open-action-modal").forEach(btn => {
-      btn.addEventListener("click", e => {
-        currentAction = e.currentTarget.dataset.action;
-        currentIdeaId = e.currentTarget.dataset.id;
-        confirmActionBtn.className = "btn " + (currentAction === "delete" ? "btn-danger" : "btn-warning");
-        actionModalBody.innerHTML = currentAction === "delete"
-          ? "Are you sure you want to <b>delete</b> this idea?"
-          : currentAction === "archive"
-            ? "Are you sure you want to <b>archive</b> this idea?"
-            : "Are you sure you want to <b>unarchive</b> this idea?";
-        actionModal.show();
-      });
-    });
-
-    confirmActionForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      confirmActionBtn.disabled = true;
-      confirmActionBtn.textContent = "Processing...";
-      try {
-        const res = await fetch("{% url 'idea_action' %}", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-          body: JSON.stringify({ action: currentAction, idea_id: currentIdeaId })
-        });
-        if (res.ok) location.reload();
-        else {
-          const err = await res.json();
-          alert(`Error: ${err.error || 'An error occurred.'}`);
-        }
-      } catch {
-        alert("Network error. Please try again.");
-      } finally {
-        confirmActionBtn.disabled = false;
-        confirmActionBtn.textContent = "Confirm";
-        actionModal.hide();
-      }
-    });
-
-    document.querySelectorAll(".thread-content").forEach(el => el.classList.add("collapse"));
-    window.toggleThread = id => {
-      const el = document.getElementById(`thread-${id}`);
-      if (el) $(el).collapse('toggle');
-    };
+  themeSelect.addEventListener("change", () => {
+    Array.from(container.classList).forEach(cls => { if (cls.startsWith("theme-")) container.classList.remove(cls); });
+    container.classList.add(themeSelect.value);
+    localStorage.setItem("dashboardTheme", themeSelect.value);
   });
-  </script>
-  {% endblock %}
+
+  const actionModal = new bootstrap.Modal(document.getElementById('actionModal'));
+  const confirmActionForm = document.getElementById('confirmActionForm');
+  const actionModalBody = document.getElementById('actionModalBody');
+  const confirmActionBtn = document.getElementById('confirmActionBtn');
+  let currentAction, currentIdeaId;
+
+  document.querySelectorAll(".open-action-modal").forEach(btn => {
+    btn.addEventListener("click", e => {
+      currentAction = e.currentTarget.dataset.action;
+      currentIdeaId = e.currentTarget.dataset.id;
+      confirmActionBtn.className = "btn " + (currentAction === "delete" ? "btn-danger" : "btn-warning");
+      actionModalBody.innerHTML = currentAction === "delete"
+        ? "Are you sure you want to <b>delete</b> this idea?"
+        : currentAction === "archive"
+          ? "Are you sure you want to <b>archive</b> this idea?"
+          : "Are you sure you want to <b>unarchive</b> this idea?";
+      actionModal.show();
+    });
+  });
+
+  confirmActionForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    confirmActionBtn.disabled = true;
+    confirmActionBtn.textContent = "Processing...";
+    try {
+      const res = await fetch("{% url 'idea_action' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+        body: JSON.stringify({ action: currentAction, idea_id: currentIdeaId })
+      });
+      if (res.ok) location.reload();
+      else {
+        const err = await res.json();
+        alert(`Error: ${err.error || 'An error occurred.'}`);
+      }
+    } catch {
+      alert("Network error. Please try again.");
+    } finally {
+      confirmActionBtn.disabled = false;
+      confirmActionBtn.textContent = "Confirm";
+      actionModal.hide();
+    }
+  });
+
+  document.querySelectorAll(".thread-content").forEach(el => el.classList.add("collapse"));
+  window.toggleThread = id => {
+    const el = document.getElementById(`thread-${id}`);
+    if (el) $(el).collapse('toggle');
+  };
+});
+</script>
+{% endblock %}

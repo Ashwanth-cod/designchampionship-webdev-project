@@ -204,6 +204,7 @@
                 
                 {% if user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'idea_create' %}active{% endif %}" href="{% url 'idea_create' %}">Create</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'forums' %}active{% endif %}" href="{% url 'forum_create' %}">Forums</a></li>
                     <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'search' %}active{% endif %}" href="{% url 'search' %}">Explore</a></li>
                     <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a></li>
                     <li class="nav-item">

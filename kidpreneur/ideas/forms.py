@@ -2,10 +2,8 @@ import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import CustomUser, Idea, ContactMessage, Message, MessageReport
+from .models import ForumPost
 
-# -------------------------
-# Signup Form
-# -------------------------
 class CustomUserCreationForm(UserCreationForm):
     dob = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
     is_student = forms.BooleanField(required=False)
@@ -21,24 +19,15 @@ class CustomUserCreationForm(UserCreationForm):
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
-        # Optional validation for phone number format
         if not re.match(r'^\+?\d{10,15}$', phone_number):
             raise forms.ValidationError("Invalid phone number format. It should be 10-15 digits.")
         return phone_number
 
-
-# -------------------------
-# User Update Form
-# -------------------------
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['username', 'email', 'first_name', 'last_name', 'dob', 'phone_number', 'school_name', 'is_student']
 
-
-# -------------------------
-# Idea Form
-# -------------------------
 class IdeaForm(forms.ModelForm):
     CATEGORY_CHOICES = [
         ('tech', 'Technology'),
@@ -70,10 +59,6 @@ class IdeaForm(forms.ModelForm):
         model = Idea
         fields = ['title', 'description', 'category', 'image', 'document']
 
-
-# -------------------------
-# Login Form (with placeholders)
-# -------------------------
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your username', 'autofocus': 'autofocus'})
@@ -82,10 +67,6 @@ class LoginForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter your password'})
     )
 
-
-# -------------------------
-# Contact Form
-# -------------------------
 class ContactForm(forms.ModelForm):
     class Meta:
         model = ContactMessage
@@ -97,12 +78,6 @@ class ContactForm(forms.ModelForm):
             'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
 
-
-# -------------------------
-# Messaging Forms
-# -------------------------
-
-# Form for sending a message
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
@@ -121,8 +96,6 @@ class MessageForm(forms.ModelForm):
             raise forms.ValidationError("Message cannot be empty.")
         return text
 
-
-# Form for reporting a message
 class MessageReportForm(forms.ModelForm):
     class Meta:
         model = MessageReport
@@ -140,3 +113,33 @@ class MessageReportForm(forms.ModelForm):
         if len(reason.strip()) == 0:
             raise forms.ValidationError("Reason for reporting cannot be empty.")
         return reason
+
+class ForumPostForm(forms.ModelForm):
+    CATEGORY_CHOICES = [
+        ('tech', 'Technology'),
+        ('edu', 'Education'),
+        ('art', 'Art & Creativity'),
+        ('science', 'Science'),
+        ('business', 'Business & Entrepreneurship'),
+        ('health', 'Health & Wellness'),
+        ('gaming', 'Gaming'),
+        ('social', 'Social Impact'),
+        ('entertainment', 'Entertainment'),
+        ('sports', 'Sports & Fitness'),
+        ('travel', 'Travel & Lifestyle'),
+        ('other', 'Other'),
+    ]
+
+    category = forms.ChoiceField(
+        choices=CATEGORY_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = ForumPost
+        fields = ['title', 'content', 'category', 'image', 'document']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})

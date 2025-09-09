@@ -4,9 +4,6 @@ from django.conf import settings
 from django.utils.text import slugify
 
 
-# -------------------------
-# Custom User
-# -------------------------
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     dob = models.DateField(null=True, blank=True)
@@ -45,9 +42,6 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-# -------------------------
-# Follow Model
-# -------------------------
 class Follow(models.Model):
     follower = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="following"
@@ -64,9 +58,6 @@ class Follow(models.Model):
         return f"{self.follower} follows {self.following}"
 
 
-# -------------------------
-# Idea Model
-# -------------------------
 class Idea(models.Model):
     CATEGORY_CHOICES = [
         ("tech", "Technology"),
@@ -85,7 +76,7 @@ class Idea(models.Model):
 
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=250, unique=True, blank=True)
-    description = models.TextField()
+    description = models.TextField(max_length=2000)
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -136,9 +127,6 @@ class Idea(models.Model):
         return self.starred_by.filter(id=user.id).exists()
 
 
-# -------------------------
-# Like Model
-# -------------------------
 class Like(models.Model):
     idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="likes")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -147,34 +135,22 @@ class Like(models.Model):
     class Meta:
         unique_together = ("idea", "user")
 
-
-# -------------------------
-# Comment Model
-# -------------------------
 class Comment(models.Model):
     idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    text = models.TextField()
+    text = models.TextField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
-
-# -------------------------
-# Contact Message Model
-# -------------------------
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
     subject = models.CharField(max_length=200)
-    message = models.TextField()
+    message = models.TextField(max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'Contact message from {self.name}'
 
-
-# -------------------------
-# Messaging Models (Email-like)
-# -------------------------
 class Conversation(models.Model):
     subject = models.CharField(max_length=255, default="(No Subject)")
     user1 = models.ForeignKey(
@@ -190,7 +166,6 @@ class Conversation(models.Model):
         unique_together = (("user1", "user2"),)
 
     def save(self, *args, **kwargs):
-        # Ensure consistent ordering of participants
         if self.user1.id > self.user2.id:
             self.user1, self.user2 = self.user2, self.user1
         super().save(*args, **kwargs)
@@ -208,8 +183,8 @@ class Message(models.Model):
         Conversation, on_delete=models.CASCADE, related_name="messages"
     )
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    subject_override = models.CharField(max_length=255, blank=True)  # e.g. "Re: ..."
-    text = models.TextField(blank=True)
+    subject_override = models.CharField(max_length=255, blank=True)
+    text = models.TextField(blank=True, max_length=200)
     attachment = models.FileField(upload_to="message_attachments/", blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
@@ -231,7 +206,6 @@ class Message(models.Model):
         self.save()
 
     def reply(self, user, text, subject=None):
-        """Reply to this message in the same conversation."""
         if self.sender == user:
             return None
         return Message.objects.create(
@@ -242,11 +216,79 @@ class Message(models.Model):
             folder="sent"
         )
 
+
 class MessageReport(models.Model):
-    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reports")
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reports") 
+    reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) 
+    reason = models.TextField(blank=True) 
+    reported_at = models.DateTimeField(auto_now_add=True) 
+
+    def __str__(self): 
+        return f"Report by {self.reported_by} on message {self.message.id}"
+
+
+class ForumPost(models.Model):
+    CATEGORY_CHOICES = [
+        ('tech', 'Technology'),
+        ('edu', 'Education'),
+        ('art', 'Art & Creativity'),
+        ('science', 'Science'),
+        ('business', 'Business & Entrepreneurship'),
+        ('health', 'Health & Wellness'),
+        ('gaming', 'Gaming'),
+        ('social', 'Social Impact'),
+        ('entertainment', 'Entertainment'),
+        ('sports', 'Sports & Fitness'),
+        ('travel', 'Travel & Lifestyle'),
+        ('other', 'Other'),
+    ]
+    
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    image = models.ImageField(upload_to='forum_images/', null=True, blank=True)
+    document = models.FileField(upload_to='forum_documents/', null=True, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(unique=True, blank=True, null=True)
+
+
+    def __str__(self):
+        return self.title
+
+
+class ForumPostLike(models.Model):
+    forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="forum_post_likes")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("forum_post", "user")
+
+    def __str__(self):
+        return f"{self.user.username} liked {self.forum_post.title}"
+
+
+class ForumPostComment(models.Model):
+    forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_accepted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.forum_post.title}"
+
+    @property
+    def total_likes(self):
+        return self.comment_likes.count()
+
+
+class ForumPostReport(models.Model):
+    forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="reports")
     reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     reason = models.TextField(blank=True)
     reported_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Report by {self.reported_by} on message {self.message.id}"
+        return f"Report by {self.reported_by} on forum post {self.forum_post.title}"
