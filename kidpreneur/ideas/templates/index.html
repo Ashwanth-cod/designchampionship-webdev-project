@@ -81,7 +81,7 @@
   }
 
   .hero-text.typing {
-    animation: blink-caret 1s step-end infinite;
+    animation: blink-caret 100ms step-end infinite;
     border-right: 0.15em solid #2196f3;
   }
 
@@ -111,13 +111,13 @@
   }
 
   /* Theme colors (optional) */
-  .theme-red   .hero-gradient { --theme-start: #ff1744; --theme-end: #ff8a80; }
+  .theme-red   .hero-gradient { --theme-start: #ff1744; --theme-end: #ff8a80; color: black; }
   .theme-yellow .hero-gradient { --theme-start: #ffc107; --theme-end: #fff176; color: black; }
-  .theme-blue  .hero-gradient { --theme-start: #2196f3; --theme-end: #90caf9; }
-  .theme-green .hero-gradient { --theme-start: #00c853; --theme-end: #69f0ae; }
-  .theme-pink  .hero-gradient { --theme-start: #e91e63; --theme-end: #f48fb1; }
-  .theme-purple .hero-gradient { --theme-start: #9c27b0; --theme-end: #ce93d8; }
-  .theme-orange .hero-gradient { --theme-start: #ff7043; --theme-end: #ffab91; }
+  .theme-blue  .hero-gradient { --theme-start: #2196f3; --theme-end: #90caf9; color: black; }
+  .theme-green .hero-gradient { --theme-start: #00c853; --theme-end: #69f0ae; color: black; }
+  .theme-pink  .hero-gradient { --theme-start: #e91e63; --theme-end: #f48fb1; color: black; }
+  .theme-purple .hero-gradient { --theme-start: #9c27b0; --theme-end: #ce93d8; color: black; }
+  .theme-orange .hero-gradient { --theme-start: #ff7043; --theme-end: #ffab91; color: black; }
 
   /* Button spacing */
   .hero-gradient .btn {
@@ -154,7 +154,7 @@
 
   <!-- Carousel Section -->
   <section class="carousel-wrapper text-center">
-    <h2 class="fw-bold mb-4">Top 3 Most Loved Ideas 💡</h2>
+    <h2 class="fw-bold mb-4">Most Loved Ideas 💡</h2>
 
     {% if top_ideas %}
     <div id="ideasCarousel" class="carousel slide carousel-dark mx-auto" data-bs-ride="carousel" data-bs-interval="5000" style="width: 1100px;">
@@ -172,7 +172,7 @@
       <div class="carousel-inner rounded shadow-sm">
         {% for idea in top_ideas %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          <a href="{% url 'idea-detail' idea.slug %}" style="text-decoration:none;">
+          <a href="{% url 'idea-detail' idea.slug %}" style="text-decoration:none; color: #000;">
             <div class="card-custom idea-card mx-auto p-4" style="max-width: 90%;">
               <h1 style="font-weight:800">{{ idea.title }}</h1>
               <p style="font-weight:200; padding: 5px 10px">{{ idea.description|truncatechars:180 }}</p>
@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     overlay.classList.add('hero-animate');
     playAnimation();
-  }, 1);
+  }, 100);
 
   // Like/star button logic (if any star buttons exist)
   document.querySelectorAll(".star-btn").forEach(button => {

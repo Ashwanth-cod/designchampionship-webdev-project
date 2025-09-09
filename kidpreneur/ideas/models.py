@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils.text import slugify
+from django.core.exceptions import ValidationError
 
 
 class CustomUser(AbstractUser):
@@ -226,7 +227,6 @@ class MessageReport(models.Model):
     def __str__(self): 
         return f"Report by {self.reported_by} on message {self.message.id}"
 
-
 class ForumPost(models.Model):
     CATEGORY_CHOICES = [
         ('tech', 'Technology'),
@@ -243,19 +243,44 @@ class ForumPost(models.Model):
         ('other', 'Other'),
     ]
     
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     content = models.TextField()
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='other')
     image = models.ImageField(upload_to='forum_images/', null=True, blank=True)
     document = models.FileField(upload_to='forum_documents/', null=True, blank=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='forum_posts')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug_candidate = base_slug
+            counter = 1
+            while ForumPost.objects.filter(slug=slug_candidate).exists():
+                slug_candidate = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug_candidate
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if not self.title.strip():
+            raise ValidationError("Title cannot be empty or whitespace.")
+        if not self.content.strip():
+            raise ValidationError("Content cannot be empty or whitespace.")
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.category})"
 
+    class Meta:
+        verbose_name = "Forum Post"
+        verbose_name_plural = "Forum Posts"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['category']),
+        ]
 
 class ForumPostLike(models.Model):
     forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="forum_post_likes")

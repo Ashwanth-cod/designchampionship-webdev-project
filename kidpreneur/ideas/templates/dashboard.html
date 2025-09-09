@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-  /* Core card styling */
   .card-custom {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -18,79 +17,71 @@
     width: 100%;
     transition: all 0.2s ease-in-out;
   }
-
-  /* Idea card layout */
   .idea-card {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
   }
-
   .ideabtn {
     border-radius: 10px;
     border: 2px solid white;
   }
-
   @media (max-width: 576px) {
     .card-custom h2 { font-size: 1.2rem; }
     .card-custom p { font-size: 0.9rem; }
   }
-
-  /* Profile styling */
   .user-avatar img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
   }
-
   .user-details h5 { margin:0; font-size:1.1rem; }
   .user-details p { margin:0; }
   .user-details .text-muted { font-size:0.9rem; }
   .user-details .text-success { color:#28a745 !important; }
   .user-details .text-danger { color:#dc3545 !important; }
-
   @media (max-width: 768px) {
-      .user-avatar img { width: 40px; height: 40px; } 
+    .user-avatar img { width: 40px; height: 40px; } 
   }
   .user-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #000000;
-  height: 100%;
-}
-
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #000000;
+    height: 100%;
+  }
+  .nav-link-tabs {
+    width:145px;
+    text-align: left;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div id="dashboardContainer" class="dashboard-container d-flex">
-  <!-- Side Tabs -->
   <div class="tab-section">
     <div class="tab-scroll-wrapper">
       <ul class="nav nav-tabs flex-column" role="tablist" aria-orientation="vertical">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ideas" role="tab" title="My Ideas">💡</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#starred" role="tab" title="Starred Ideas">⭐</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#archived" role="tab" title="Archived Ideas">🗂️</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#create" role="tab" title="Create Idea">➕</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile" role="tab" title="Profile">👤</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#messages" role="tab" title="Messages">💬</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#theme" role="tab" title="Customize Theme">🎨</button></li>
+        <li class="nav-item"><button class="nav-link nav-link-tabs active" data-bs-toggle="tab" data-bs-target="#ideas" role="tab" title="My Ideas">💡 My Ideas</button></li>
+        <li class="nav-item"><button class="nav-link nav-link-tabs" data-bs-toggle="tab" data-bs-target="#starred" role="tab" title="Starred Ideas">⭐Starred</button></li>
+        <li class="nav-item"><button class="nav-link nav-link-tabs" data-bs-toggle="tab" data-bs-target="#archived" role="tab" title="Archived Ideas">🗂️ Archived</button></li>
+        <li class="nav-item"><button class="nav-link nav-link-tabs" data-bs-toggle="tab" data-bs-target="#create" role="tab" title="Create Idea">➕ Create</button></li>
+        <li class="nav-item"><button class="nav-link nav-link-tabs" data-bs-toggle="tab" data-bs-target="#profile" role="tab" title="Profile">👤 Profile</button></li>
+        <li class="nav-item"><button class="nav-link nav-link-tabs" data-bs-toggle="tab" data-bs-target="#messages" role="tab" title="Messages">💬 Message</button></li>
+        <li class="nav-item"><button class="nav-link nav-link-tabs" data-bs-toggle="tab" data-bs-target="#theme" role="tab" title="Customize Theme">🎨 Customize</button></li>
       </ul>
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="content-section flex-grow-1">
     <div class="tab-content p-3">
 
-      <!-- My Ideas -->
       <div class="tab-pane fade show active" id="ideas" role="tabpanel">
         <h1 class="text-center mb-4">💡 My Ideas</h1>
         <div class="row">
@@ -115,7 +106,6 @@
         </div>
       </div>
 
-      <!-- Starred Ideas -->
       <div class="tab-pane fade" id="starred" role="tabpanel">
         <h1 class="text-center mb-4">⭐ Starred Ideas</h1>
         <div class="row">
@@ -136,7 +126,6 @@
         </div>
       </div>
 
-      <!-- Archived Ideas -->
       <div class="tab-pane fade" id="archived" role="tabpanel">
         <h1 class="text-center mb-4">🗂️ Archived Ideas</h1>
         <div class="row">
@@ -159,7 +148,6 @@
         </div>
       </div>
 
-      <!-- Create Idea -->
       <div class="tab-pane fade" id="create" role="tabpanel">
         <h1 class="text-center mb-4">➕ Create New Idea</h1>
         <a href="{% url 'idea_create' %}" class="create-idea-card text-decoration-none">
@@ -170,155 +158,148 @@
         </a>
       </div>
 
-<!-- Profile Tab -->
-<div class="tab-pane fade" id="profile" role="tabpanel">
-    <h1 class="text-center mb-4">👤 My Profile</h1>
-
-    <!-- Stats -->
-    <div class="row mb-4 text-center">
-        {% for stat_name, stat_icon, stat_value in stats %}
-        <div class="col-6 col-md-3 mb-2">
+      <div class="tab-pane fade" id="profile" role="tabpanel">
+        <h1 class="text-center mb-4">👤 My Profile</h1>
+        <div class="row mb-4 text-center">
+          {% for stat_name, stat_icon, stat_value in stats %}
+          <div class="col-6 col-md-3 mb-2">
             <div class="card-custom p-3">
-                <i class="bi {{ stat_icon }} mb-1" style="font-size:1.5rem;"></i>
-                <h5 class="mb-0"><b>{{ stat_value }}</b></h5>
-                <small>{{ stat_name }}</small>
+              <i class="bi {{ stat_icon }} mb-1" style="font-size:1.5rem;"></i>
+              <h5 class="mb-0"><b>{{ stat_value }}</b></h5>
+              <small>{{ stat_name }}</small>
             </div>
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-
-    <!-- Update Button -->
-    <div class="text-center mb-3">
-        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#profileUpdateForm" aria-expanded="false" aria-controls="profileUpdateForm">
+        <div class="text-center mb-3">
+          <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#profileUpdateForm" aria-expanded="false" aria-controls="profileUpdateForm">
             Update Profile
-        </button>
-    </div>
-
-    <!-- Profile Form (collapsed by default) -->
-    <div class="collapse" id="profileUpdateForm">
-        <div class="card-custom p-3 mb-4">
+          </button>
+        </div>
+        <div class="collapse" id="profileUpdateForm">
+          <div class="card-custom p-3 mb-4">
             <h2 class="mb-3">Update Profile</h2>
             <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="hidden" name="profile_update_form" value="1">
-                {{ profile_update_form.as_p }}
-                <button type="submit" class="btn btn-success">Save Changes</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Followers & Following (unchanged) -->
-    <div class="row">
-        <!-- Followers -->
-        <div class="col-12 col-md-6 mb-4">
-            <h2>Followers</h2>
-            <div class="row">
-                {% for follower in followers %}
-                
-                <div class="col-12 col-sm-6 col-md-4 mb-3">
-                    <div class="card-custom p-3 d-flex align-items-center">
-                        <div class="user-avatar me-3">
-                            <img src="{% if follower.profile_picture %}{{ follower.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Avatar">
-                        </div>
-                        <div class="user-details">
-                            <h5><b>{{ follower.username }}</b></h5>
-                            <p class="text-muted">{{ follower.email }}</p>
-                            <p class="small text-muted">Joined: {{ follower.date_joined|date:"M d, Y" }}</p>
-                            <p class="small {% if follower in following %}text-success{% else %}text-danger{% endif %}">
-                                {% if follower in following %}Mutual Follower{% else %}Not Following Back{% endif %}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}<p>No followers yet.</p>{% endfor %}
-            </div>
-        </div>
-
-        <!-- Following -->
-        <div class="col-12 col-md-6 mb-4">
-            <h2>Following</h2>
-            <div class="row">
-                {% for user in following %}
-                <div class="col-12 col-sm-6 col-md-4 mb-3">
-                    <div class="card-custom p-3 d-flex align-items-center">
-                        <div class="user-avatar me-3">
-                            <img src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Avatar">
-                        </div>
-                        <div class="user-details">
-                            <h5><b>{{ user.username }}</b></h5>
-                            <p class="text-muted">{{ user.email }}</p>
-                            <p class="small text-muted">Joined: {{ user.date_joined|date:"M d, Y" }}</p>
-                            <p class="small {% if user in followers %}text-success{% else %}text-danger{% endif %}">
-                                {% if user in followers %}Mutual Follower{% else %}Not Following Back{% endif %}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}<p>You are not following anyone yet.</p>{% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
-
-
-      <!-- Messages Tab -->
-      <div class="tab-pane fade" id="messages" role="tabpanel">
-        <h1 class="text-center mb-4">📧 Messages</h1>
-        <div class="d-flex justify-content-end mb-3 sticky-top bg-white py-2">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeModal">✉️ Compose</button>
-        </div>
-
-        {% for convo in conversations %}
-        <div class="card-custom mb-4">
-          <h5 class="mb-2 d-flex justify-content-between align-items-center">
-            <span onclick="toggleThread('{{ convo.id }}')" style="cursor:pointer; font-weight:600;">
-              {% if convo.subject %} {{ convo.subject }} {% else %} (No Subject) {% endif %} — with 
-              {% if convo.user1 == request.user %}
-                {{ convo.user2.username }}
-              {% else %}
-                {{ convo.user1.username }}
-              {% endif %}
-                          
-            </span>
-            {% with unread_counts|get_item:convo.id as unread %}
-              {% if unread and unread > 0 %}
-              <span class="badge bg-danger" style="font-size:0.8rem;">{{ unread }} unread</span>
-              {% endif %}
-            {% endwith %}
-          </h5>
-          <div id="thread-{{ convo.id }}" class="thread-content collapse">
-            <div class="chat-box p-3">
-              {% with conversation_messages|get_item:convo.id as messages %}
-                {% for msg in messages %}
-                <div class="mb-2 {% if msg.sender == request.user %}text-end{% else %}text-start{% endif %}">
-                  <div class="d-inline-block p-2 rounded {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}" style="max-width:80%; word-wrap:break-word;">
-                    <div class="small fw-bold mb-1">{{ msg.sender.username|default:msg.sender.email }}</div>
-                    {% if msg.subject_override %}<strong>{{ msg.subject_override }}</strong><br>{% endif %}
-                    {{ msg.text|linebreaks }}
-                    {% if msg.attachment %}<br><a href="{{ msg.attachment.url }}" target="_blank">📎 Attachment</a>{% endif %}
-                    <div class="small text-muted mt-1">{{ msg.timestamp|date:"M d, H:i" }}</div>
-                  </div>
-                </div>
-                {% empty %}<p class="text-muted m-0">No messages yet.</p>{% endfor %}
-              {% endwith %}
-            </div>
-            <form method="post" enctype="multipart/form-data" class="mt-3 border-top pt-2">
               {% csrf_token %}
-              <input type="hidden" name="conversation_id" value="{{ convo.id }}">
-              <input type="hidden" name="send_message_form" value="1">
-              <div class="mb-2"><input type="text" name="subject" class="form-control" placeholder="Subject (optional)"></div>
-              <div class="input-group">
-                {{ message_form.text }}
-                <input type="file" name="attachment" class="form-control">
-                <button type="submit" class="btn btn-success">Reply</button>
-              </div>
+              <input type="hidden" name="profile_update_form" value="1">
+              {{ profile_update_form.as_p }}
+              <button type="submit" class="btn btn-success">Save Changes</button>
             </form>
           </div>
         </div>
-        {% empty %}<p class="text-muted fst-italic">No conversations yet. Start one now!</p>{% endfor %}
+        <div class="row">
+          <div class="col-12 col-md-6 mb-4">
+            <h2>Followers</h2>
+            <div class="row">
+              {% for follower in followers %}
+              <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <div class="card-custom p-3 d-flex align-items-center">
+                  <div class="user-avatar me-3">
+                    <img src="{% if follower.profile_picture %}{{ follower.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Avatar">
+                  </div>
+                  <div class="user-details">
+                    <h5><b>{{ follower.username }}</b></h5>
+                    <p class="text-muted">{{ follower.email }}</p>
+                    <p class="small text-muted">Joined: {{ follower.date_joined|date:"M d, Y" }}</p>
+                    <p class="small {% if follower in following %}text-success{% else %}text-danger{% endif %}">
+                      {% if follower in following %}Mutual Follower{% else %}Not Following Back{% endif %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {% empty %}<p>No followers yet.</p>{% endfor %}
+            </div>
+          </div>
+          <div class="col-12 col-md-6 mb-4">
+            <h2>Following</h2>
+            <div class="row">
+              {% for user in following %}
+              <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <div class="card-custom p-3 d-flex align-items-center">
+                  <div class="user-avatar me-3">
+                    <img src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Avatar">
+                  </div>
+                  <div class="user-details">
+                    <h5><b>{{ user.username }}</b></h5>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <p class="small text-muted">Joined: {{ user.date_joined|date:"M d, Y" }}</p>
+                    <p class="small {% if user in followers %}text-success{% else %}text-danger{% endif %}">
+                      {% if user in followers %}Mutual Follower{% else %}Not Following Back{% endif %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {% empty %}<p>You are not following anyone yet.</p>{% endfor %}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Theme Tab -->
+
+      <div class="tab-pane fade" id="messages" role="tabpanel">
+  <h1 class="text-center mb-4">💬 Messages</h1>
+  <div class="text-center mb-3">
+    <!-- Compose New Message Button -->
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeModal">
+      ✉️ Compose New Message
+    </button>
+  </div>
+
+  {% if conversations %}
+    <div class="list-group">
+      {% for convo in conversations %}
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><b>Conversation with:</b>
+              {% if convo.user2 == user %}
+                {{ convo.user1.username }}
+              {% else %}
+                {{ convo.user2.username }}
+              {% endif %}
+            </span>
+            {% if unread_counts %}
+              <span class="badge bg-danger">{{ unread_counts|dict_get:convo.id }}</span>
+            {% endif %}
+          </div>
+
+          <div class="card-body" style="max-height:300px; overflow-y:auto;">
+            {% for msg in conversation_messages|dict_get:convo.id %}
+              {% if msg.sender == user %}
+                <div class="text-end mb-2">
+                  <span class="badge bg-primary">You</span>
+                  <p>{{ msg.text }}</p>
+                  <small class="text-muted">{{ msg.timestamp|date:"M d, Y H:i" }}</small>
+                </div>
+              {% else %}
+                <div class="text-start mb-2">
+                  <span class="badge bg-secondary">{{ msg.sender.username }}</span>
+                  <p>{{ msg.text }}</p>
+                  <small class="text-muted">{{ msg.timestamp|date:"M d, Y H:i" }}</small>
+                </div>
+              {% endif %}
+            {% empty %}
+              <p>No messages in this conversation yet.</p>
+            {% endfor %}
+          </div>
+
+          <div class="card-footer">
+            <button class="btn btn-sm btn-success" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#composeModal"
+                    onclick="document.getElementById('recipient_id').value = '{% if convo.user2 == user %}{{ convo.user1.id }}{% else %}{{ convo.user2.id }}{% endif %}'">
+              Reply
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center">You don’t have any message threads yet.</p>
+  {% endif %}
+</div>
+
+
+
       <div class="tab-pane fade" id="theme" role="tabpanel">
         <h1 class="text-center mb-4">🎨 Customize Theme</h1>
         <div class="card-custom text-center p-3">
@@ -338,7 +319,6 @@
   </div>
 </div>
 
-<!-- Compose Modal -->
 <div class="modal fade" id="composeModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content shadow">
@@ -383,12 +363,12 @@
   </div>
 </div>
 
-<!-- Confirm Action Modal -->
 <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form id="confirmActionForm" method="post" class="modal-content">
       {% csrf_token %}
-      <div class="modal-header"><h5 id="actionModalLabel" class="modal-title">Confirm Action</h5>
+      <div class="modal-header">
+        <h5 id="actionModalLabel" class="modal-title">Confirm Action</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" id="actionModalBody"></div>
@@ -406,7 +386,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("dashboardContainer");
   const themeSelect = document.getElementById("themeSelect");
-  const savedTheme = localStorage.getItem("dashboardTheme") || "theme-yellow";
+  const savedTheme = localStorage.getItem("dashboardTheme") || "theme-blue";
   container.classList.add(savedTheme);
   themeSelect.value = savedTheme;
 

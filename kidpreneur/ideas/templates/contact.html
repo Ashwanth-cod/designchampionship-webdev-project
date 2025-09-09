@@ -51,6 +51,12 @@
         padding: 15px;
         margin-bottom: 25px;
     }
+
+    /* Apply italic style to all placeholders */
+    input::placeholder,
+    textarea::placeholder {
+      font-style: italic;
+    }
 </style>
 
 <div class="container contact-container">
@@ -67,19 +73,15 @@
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
-            <label for="id_name">Your Name</label>
             {{ form.name|add_class:"form-control" }}
         </div>
         <div class="form-group">
-            <label for="id_email">Your Email</label>
             {{ form.email|add_class:"form-control" }}
         </div>
         <div class="form-group">
-            <label for="id_subject">Subject</label>
             {{ form.subject|add_class:"form-control" }}
         </div>
         <div class="form-group">
-            <label for="id_message">Your Message</label>
             {{ form.message|add_class:"form-control" }}
         </div>
         <div class="text-center">

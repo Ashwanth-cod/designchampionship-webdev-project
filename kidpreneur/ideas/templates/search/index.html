@@ -237,7 +237,7 @@
     else if (activeTab === "forum_posts") {
       results.innerHTML = `<div class="cards-grid">${
         data.map(post => `
-        <a href="/forum/${post.title}/" style="text-decoration:none;">
+        <a href="/forum/{{ fourms_posts.slug }}/" style="text-decoration:none;">
           <article class="card-custom post-card-gen">
             <h3>${post.title}</h3>
             <p class="description">${post.content || "No content available."}</p>

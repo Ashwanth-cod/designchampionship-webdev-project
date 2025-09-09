@@ -73,7 +73,6 @@ def search_page(request):
         "selected_category": category,
     })
 
-# API function for handling search queries
 @login_required(login_url='/login/')
 def search_api(request):
     q = request.GET.get("q", "").strip()
@@ -206,18 +205,14 @@ def dashboard_view(request):
     total_likes = sum(idea.likes.count() for idea in ideas)
 
     # --- Followers / Following ---
-    # Followers = users who follow me
     followers_qs = user.followers.select_related("follower")
     followers = [f.follower for f in followers_qs]
 
-    # Following = users I follow
     following_qs = user.following.select_related("following")
     following = [f.following for f in following_qs]
 
-    # Mutual followers
     mutual_followers = set(followers) & set(following)
 
-    # Followers info for template
     followers_info = [
         {
             "follower": f.follower,
@@ -252,13 +247,27 @@ def dashboard_view(request):
         folder="archived", conversation__in=conversations
     ).select_related("sender", "conversation")
 
-    conversation_messages = {
-        convo.id: convo.messages.select_related("sender").order_by("timestamp")
-        for convo in conversations
-    }
-    unread_counts = {convo.id: convo.unread_count for convo in conversations}
+    conversation_messages = {}
+    for convo in conversations:
+        user_a = convo.user1
+        user_b = convo.user2
 
-    # Mark unread as read when user views
+        # Only include messages where sender and recipient are user and other_user
+        messages = Message.objects.filter(
+            conversation=convo,
+            sender__in=[user_a, user_b]
+        ).order_by("timestamp").select_related("sender")
+
+        # Optional: exclude messages not directly between the two
+        conversation_messages[convo.id] = [
+            msg for msg in messages
+            if (msg.sender == user and msg.folder == "sent") or 
+               (msg.sender != user and msg.folder == "inbox")
+        ]
+
+        unread_counts = {convo.id: convo.unread_count for convo in conversations}
+
+    # Mark unread as read
     for convo in conversations:
         convo.messages.filter(is_read=False).exclude(sender=user).update(is_read=True)
 
@@ -343,15 +352,21 @@ def dashboard_view(request):
                 message.save()
                 return redirect("dashboard")
 
+    # --- Last message (fix for template) ---
+    last_message = None
+    if inbox_messages.exists() or sent_messages.exists():
+        all_messages = inbox_messages.union(sent_messages).order_by("timestamp")
+        last_message = all_messages.last()
+
     # --- Context ---
     context = {
         "ideas": ideas,
         "starred_ideas": starred_ideas,
         "archived_ideas": archived_ideas,
         "total_likes": total_likes,
-        "followers": followers,  # list of user objects
-        "following": following,  # list of user objects
-        "followers_info": followers_info,  # enriched info dicts
+        "followers": followers,
+        "following": following,
+        "followers_info": followers_info,
         "mutual_followers": mutual_followers,
         "profile_update_form": profile_update_form,
         "message_form": message_form,
@@ -363,6 +378,7 @@ def dashboard_view(request):
         "sent_messages": sent_messages,
         "archived_messages": archived_messages,
         "stats": stats,
+        "last_message": last_message,  # ✅ added
     }
 
     return render(request, "dashboard.html", context)
@@ -550,7 +566,6 @@ def toggle_like(request, slug):
         return JsonResponse({"liked": liked, "like_count": like_count})
     return JsonResponse({"error": "Invalid request"}, status=400)
 
-
 @login_required(login_url='/login/')
 def toggle_star(request, slug):
     idea = get_object_or_404(Idea, slug=slug)
@@ -574,7 +589,6 @@ def idea_create(request):
         form = IdeaForm()
     return render(request, "ideas/idea_form.html", {"form": form})
 
-
 @login_required(login_url='/login/')
 def idea_update(request, slug):
     idea = get_object_or_404(Idea, slug=slug, created_by=request.user)
@@ -587,7 +601,6 @@ def idea_update(request, slug):
         form = IdeaForm(instance=idea)
     return render(request, "ideas/idea_form.html", {"form": form})
 
-
 @login_required(login_url='/login/')
 def idea_delete(request, slug):
     idea = get_object_or_404(Idea, slug=slug, created_by=request.user)
@@ -595,21 +608,6 @@ def idea_delete(request, slug):
         idea.delete()
         return redirect("dashboard")
     return render(request, "ideas/idea_confirm_delete.html", {"idea": idea})
-
-
-@login_required(login_url='/login/')
-def forum_post_create(request):
-    if request.method == "POST":
-        form = ForumPostForm(request.POST, request.FILES)
-        if form.is_valid():
-            forum_post = form.save(commit=False)
-            forum_post.created_by = request.user
-            forum_post.save()
-            return redirect('dashboard')
-    else:
-        form = ForumPostForm()
-
-    return render(request, "forums/forum_create.html", {"form": form})
 
 @login_required(login_url='/login/')
 def idea_detail(request, slug):
@@ -744,24 +742,6 @@ def forum_toggle_like(request, slug):
         })
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
-
-@login_required(login_url='/login/')
-def forum_post_detail(request, slug):
-    forum_post = get_object_or_404(ForumPost, slug=slug)
-
-    user_liked = ForumPostLike.objects.filter(
-        forum_post=forum_post,
-        user=request.user
-    ).exists()
-
-    like_count = forum_post.forum_post_likes.count()
-
-    return render(request, "forums/forum_details.html", {
-        "forum_post": forum_post,
-        "user_liked": user_liked,
-        "like_count": like_count,
-    })
 
 @login_required(login_url='/login/')
 def forum_post_detail(request, slug):
