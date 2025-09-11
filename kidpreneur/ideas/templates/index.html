@@ -19,10 +19,17 @@
     --theme-end: #90caf9;
   }
 
+  body {
+  background: url("{% static 'images/doodle-bg2.png' %}"); 
+  background-size: 300px 300px; 
+}
+
   #animationOverlay {
     position: fixed;
     inset: 0;
     background: white;
+    background: url("{% static 'images/doodle-bg2.png' %}");
+    background-size: cover;
     z-index: 1050;
     display: flex;
     flex-direction: column;

@@ -46,6 +46,17 @@ class IdeaForm(forms.ModelForm):
     class Meta:
         model = Idea
         fields = ['title', 'description', 'category', 'image', 'document']
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title', '')
+        slug = '-'.join(''.join(c if c.isalnum() or c == ' ' else '' for c in title.lower()).split())
+        self.instance.slug = slug
+        return title
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter your username'}))
@@ -107,14 +118,42 @@ class ForumPostForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Apply common class
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
+
+        # Add specific placeholders
+        self.fields['title'].widget.attrs.update({
+            'placeholder': 'Enter a descriptive title for your post'
+        })
+
+        self.fields['content'].widget.attrs.update({
+            'placeholder': 'Write the content of your forum post here...'
+        })
+
+        self.fields['category'].widget.attrs.update({
+            'placeholder': 'Select a category'
+        })
+
+        self.fields['image'].widget.attrs.update({
+            'placeholder': 'Upload an optional image'
+        })
+
+        self.fields['document'].widget.attrs.update({
+            'placeholder': 'Upload a document if needed'
+        })
 
     def clean_title(self):
         title = self.cleaned_data.get('title', '')
         slug = '-'.join(''.join(c if c.isalnum() or c == ' ' else '' for c in title.lower()).split())
         self.instance.slug = slug
+
+        if ForumPost.objects.filter(slug=slug).exists():
+            raise forms.ValidationError("A post with this title already exists. Please use a different title.")
+
         return title
+
 
 class ForumPostCommentForm(forms.ModelForm):
     class Meta:

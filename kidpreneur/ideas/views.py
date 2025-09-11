@@ -714,8 +714,13 @@ def forum_post_create(request):
         if form.is_valid():
             forum_post = form.save(commit=False)
             forum_post.created_by = request.user
-            forum_post.save()
-            return redirect('dashboard')
+            
+            if ForumPost.objects.filter(slug=forum_post.slug).exists():
+                form.add_error('slug', 'A post with this slug already exists.')
+            else:
+                forum_post.save()
+                return redirect('dashboard')
+
     else:
         form = ForumPostForm()
 

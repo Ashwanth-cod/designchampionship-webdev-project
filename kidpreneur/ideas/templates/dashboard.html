@@ -8,6 +8,11 @@
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <style>
+   body {
+    background: url("{% static 'images/doodle-bg2.png' %}"); 
+    background-size: 300px 300px; 
+  }
+
   .card-custom {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -65,11 +70,11 @@
      THEME STYLES
      =============================== */
   .theme-yellow {
-    background-color: #fffbe6;
+    background-color: #eaffea;
     color: #664d00;
   }
   .theme-blue {
-    background-color: #e6f0ff;
+    background-color: #eaffea;
     color: #002855;
   }
   .theme-green {
@@ -94,6 +99,34 @@
     background: #fff;
     color: #000;
   }
+  .nav-tabs .nav-link.active {
+  color: #495057;
+  background-color: #fff;   /* ← forces white background */
+  border-color: #dee2e6 #dee2e6 #fff;
+}
+/* Override Bootstrap active state for your sidebar tabs */
+.nav-link-tabs.active {
+  background-color: #000 !important;   /* pick a universal background, or theme color */
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+/* Normal state */
+.nav-link-tabs {
+  background: transparent;
+  color: #000;
+  border: none;
+  text-align: left;
+  padding: 10px 15px;
+  transition: background 0.2s ease;
+}
+
+/* Hover effect */
+.nav-link-tabs:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+  
 </style>
 {% endblock %}
 
@@ -225,17 +258,17 @@
         <div class="row">
           <div class="col-12 col-md-6 mb-4">
             <h2>Followers</h2>
-            <div class="row">
+            <div class="column">
               {% for follower in followers %}
               <div class="col-12 col-sm-6 col-md-4 mb-3">
-                <div class="card-custom p-3 d-flex align-items-center">
+                <div class="card-custom p-3 d-inline-flex align-items-center me-2 mb-2">
                   <div class="user-avatar me-3">
                     <img src="{% if follower.profile_picture %}{{ follower.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Avatar">
                   </div>
                   <div class="user-details">
                     <h5><b>{{ follower.username }}</b></h5>
-                    <p class="text-muted">{{ follower.email }}</p>
-                    <p class="small text-muted">Joined: {{ follower.date_joined|date:"M d, Y" }}</p>
+                    <!--p class="text-muted">{{ follower.email }}</p>
+                    <p class="small text-muted">Joined: {{ follower.date_joined|date:"M d, Y" }}</p-->
                     <p class="small {% if follower in following %}text-success{% else %}text-danger{% endif %}">
                       {% if follower in following %}Mutual Follower{% else %}Not Following Back{% endif %}
                     </p>
@@ -247,17 +280,17 @@
           </div>
           <div class="col-12 col-md-6 mb-4">
             <h2>Following</h2>
-            <div class="row">
+            <div class="column">
               {% for user in following %}
               <div class="col-12 col-sm-6 col-md-4 mb-3">
-                <div class="card-custom p-3 d-flex align-items-center">
+                <div class="card-custom p-3 d-inline-flex align-items-center me-2 mb-2 w-auto">
                   <div class="user-avatar me-3">
                     <img src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Avatar">
                   </div>
                   <div class="user-details">
                     <h5><b>{{ user.username }}</b></h5>
-                    <p class="text-muted">{{ user.email }}</p>
-                    <p class="small text-muted">Joined: {{ user.date_joined|date:"M d, Y" }}</p>
+                    <!--p class="text-muted">{{ user.email }}</p>
+                    <p class="small text-muted">Joined: {{ user.date_joined|date:"M d, Y" }}</p-->
                     <p class="small {% if user in followers %}text-success{% else %}text-danger{% endif %}">
                       {% if user in followers %}Mutual Follower{% else %}Not Following Back{% endif %}
                     </p>
@@ -369,10 +402,11 @@
             <label for="recipient_id" class="form-label">Recipient</label>
             <select id="recipient_id" name="recipient_id" class="form-select" required>
               <option value="" disabled selected>Select recipient</option>
-              {% for user in mutual_followers %}
+              {% for user in following %}
                 <option value="{{ user.id }}">{{ user.username|default:user.email }}</option>
               {% empty %}
-                <option value="" disabled>No mutual followers available</option>
+                <!--option value="" disabled>No mutual followers available</option-->
+                <option value="" disabled>Follow to get recipient</option>
               {% endfor %}
             </select>
           </div>
@@ -442,7 +476,6 @@ document.addEventListener("DOMContentLoaded", () => {
     location.reload();
   });
 
-  // === your existing modal/action JS unchanged ===
   const actionModal = new bootstrap.Modal(document.getElementById('actionModal'));
   const confirmActionForm = document.getElementById('confirmActionForm');
   const actionModalBody = document.getElementById('actionModalBody');
