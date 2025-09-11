@@ -60,8 +60,43 @@
     width:145px;
     text-align: left;
   }
+
+  /* ===============================
+     THEME STYLES
+     =============================== */
+  .theme-yellow {
+    background-color: #fffbe6;
+    color: #664d00;
+  }
+  .theme-blue {
+    background-color: #e6f0ff;
+    color: #002855;
+  }
+  .theme-green {
+    background-color: #eaffea;
+    color: #004d1a;
+  }
+  .theme-pink {
+    background-color: #ffe6f0;
+    color: #660033;
+  }
+  .theme-purple {
+    background-color: #f6e6ff;
+    color: #3d0066;
+  }
+  .theme-orange {
+    background-color: #fff0e6;
+    color: #663300;
+  }
+
+  /* make sure text in cards stays readable */
+  .dashboard-container .card-custom {
+    background: #fff;
+    color: #000;
+  }
 </style>
 {% endblock %}
+
 
 {% block content %}
 <div id="dashboardContainer" class="dashboard-container d-flex">
@@ -386,16 +421,28 @@
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("dashboardContainer");
   const themeSelect = document.getElementById("themeSelect");
+
+  // Apply saved theme
   const savedTheme = localStorage.getItem("dashboardTheme") || "theme-blue";
   container.classList.add(savedTheme);
   themeSelect.value = savedTheme;
 
+  // Change theme on select
   themeSelect.addEventListener("change", () => {
-    Array.from(container.classList).forEach(cls => { if (cls.startsWith("theme-")) container.classList.remove(cls); });
+    // Remove any old theme classes
+    Array.from(container.classList).forEach(cls => { 
+      if (cls.startsWith("theme-")) container.classList.remove(cls); 
+    });
+
+    // Add new theme
     container.classList.add(themeSelect.value);
+
+    // Save in localStorage
     localStorage.setItem("dashboardTheme", themeSelect.value);
+    location.reload();
   });
 
+  // === your existing modal/action JS unchanged ===
   const actionModal = new bootstrap.Modal(document.getElementById('actionModal'));
   const confirmActionForm = document.getElementById('confirmActionForm');
   const actionModalBody = document.getElementById('actionModalBody');
@@ -439,12 +486,6 @@ document.addEventListener("DOMContentLoaded", () => {
       actionModal.hide();
     }
   });
-
-  document.querySelectorAll(".thread-content").forEach(el => el.classList.add("collapse"));
-  window.toggleThread = id => {
-    const el = document.getElementById(`thread-${id}`);
-    if (el) $(el).collapse('toggle');
-  };
 });
 </script>
 {% endblock %}

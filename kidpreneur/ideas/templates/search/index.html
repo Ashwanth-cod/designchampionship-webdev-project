@@ -150,8 +150,17 @@
 
   searchInput.addEventListener("keyup", () => {
     clearTimeout(typingTimer);
-    typingTimer = setTimeout(runSearch, 400);
+    typingTimer = setTimeout(runSearch, 200);
   });
+
+    function generateSlug(title) {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')      // Remove non-word characters
+      .replace(/\s+/g, '-')          // Replace spaces with hyphens
+      .replace(/-+/g, '-');          // Collapse multiple hyphens
+  }
 
   async function runSearch() {
     const q = searchInput.value.trim();
@@ -168,6 +177,7 @@
       const res = await fetch(url, { signal: controller.signal });
       if (!res.ok) throw new Error("Network error");
       const data = await res.json();
+    console.log("Forum posts data:", data);
       renderResults(data);
     } catch (err) {
       if (err.name !== "AbortError") {
@@ -236,19 +246,23 @@
     }
     else if (activeTab === "forum_posts") {
       results.innerHTML = `<div class="cards-grid">${
-        data.map(post => `
-        <a href="/forum/{{ fourms_posts.slug }}/" style="text-decoration:none;">
-          <article class="card-custom post-card-gen">
-            <h3>${post.title}</h3>
-            <p class="description">${post.content || "No content available."}</p>
-            <div class="meta">
-              <span>Category: ${post.category}</span>
-            </div>
-          </article>
-        </a>
-        `).join("")
+        data.map(post => {
+          const slug = post.slug || generateSlug(post.title);
+          return `
+            <a href="/forum/${slug}/" style="text-decoration:none;">
+              <article class="card-custom post-card-gen">
+                <h3>${post.title}</h3>
+                <p class="description">${post.content || "No content available."}</p>
+                <div class="meta">
+                  <span>Category: ${post.category || "Uncategorized"}</span>
+                </div>
+              </article>
+            </a>
+          `;
+        }).join("")
       }</div>`;
     }
+
   }
 
   document.addEventListener("DOMContentLoaded", () => {

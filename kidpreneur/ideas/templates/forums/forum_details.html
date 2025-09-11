@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ post.title|slice:":20" }} - Forum Post{% endblock %}
+{% block title %}{{ forum_post.title|slice:":20" }} - Forum Post{% endblock %}
 {% block content %}
 {% load humanize %}
 
@@ -37,7 +37,6 @@
     white-space: pre-line;
   }
 
-  /* Modal Image & Doc Styles */
   .modal-content img, .modal-content iframe {
     width: 100%;
     height: auto;
@@ -48,44 +47,40 @@
   }
 </style>
 
-<!-- MAIN CONTENT -->
 <div class="forum-post-container">
-  <!-- LEFT SIDE -->
   <div>
     <div class="card-custom description">
-      <h2>{{ post.title }}</h2>
-      <p class="post-description">{{ post.content }}</p>
+      <h2>{{ forum_post.title }}</h2>
+      <p class="post-description">{{ forum_post.content }}</p>
 
-      {% if post.image or post.document %}
+      {% if forum_post.image or forum_post.document %}
       <div id="postCarousel" class="carousel slide mt-4" data-bs-ride="carousel">
         <div class="carousel-inner">
-          {% if post.image %}
+          {% if forum_post.image %}
           <div class="carousel-item active">
-            <img src="{{ post.image.url }}" class="d-block w-100"
+            <img src="{{ forum_post.image.url }}" class="d-block w-100"
               style="max-height: 500px; object-fit: cover; border-radius: 12px; cursor: pointer;"
               data-bs-toggle="modal" data-bs-target="#mediaModal"
-              data-type="image" data-src="{{ post.image.url }}">
+              data-type="image" data-src="{{ forum_post.image.url }}">
           </div>
           {% endif %}
-
-          {% if post.document %}
-          <div class="carousel-item {% if not post.image %}active{% endif %}">
+          {% if forum_post.document %}
+          <div class="carousel-item {% if not forum_post.image %}active{% endif %}">
             <div class="d-flex justify-content-center align-items-center"
               style="height: 300px; background: #f8f9fa; cursor: pointer;"
               data-bs-toggle="modal" data-bs-target="#mediaModal"
               data-type="document"
-              data-src="{{ post.document.url }}"
-              data-extension="{{ post.document.url|lower|slice:'-4:' }}">
+              data-src="{{ forum_post.document.url }}"
+              data-extension="{{ forum_post.document.url|lower|slice:'-4:' }}">
               <div class="text-center">
                 <i class="bi bi-file-earmark-text" style="font-size: 4rem;"></i><br>
-                <strong>{{ post.document.name|cut:"forum_documents/" }}</strong>
+                <strong>{{ forum_post.document.name|cut:"forum_documents/" }}</strong>
               </div>
             </div>
           </div>
           {% endif %}
         </div>
-
-        {% if post.image and post.document %}
+        {% if forum_post.image and forum_post.document %}
         <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
@@ -104,37 +99,26 @@
     <div class="card-custom author">
       <p>
         By <strong>
-          {% if post.created_by == request.user %}
+          {% if forum_post.created_by == request.user %}
           <a href="{% url 'dashboard' %}" style="text-decoration:none;">
-            {{ post.created_by.username }}
+            {{ forum_post.created_by.username }}
           </a>
           {% else %}
-            {{ post.created_by.username }}
-          </a>
+            {{ forum_post.created_by.username }}
           {% endif %}
         </strong><br>
-        <small>{{ post.created_at|date:"M d, Y" }}</small>
+        <small>{{ forum_post.created_at|date:"M d, Y" }}</small>
       </p>
     </div>
   </div>
 
-  <!-- RIGHT SIDE -->
   <div>
     <div class="card-custom likes mb-3">
-        <form method="post" action="{% url 'toggle_like_forum' forum_post.slug %}">
-            {% csrf_token %}
-            <button type="submit" class="btn {% if user_liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                {% if user_liked %}💔 Unlike{% else %}❤️ Like{% endif %}
-                {{ like_count }}
-            </button>
-        </form>
+      <button id="likeBtn" class="btn {% if user_liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
+        {% if user_liked %}💔 Unlike{% else %}❤️ Like{% endif %}
+        <span id="likeCount">{{ like_count }}</span>
+      </button>
 
-      <form method="post" class="report">
-        {% csrf_token %}
-        <button name="report_toggle" value="1" class="btn btn-warning">
-          🚩 Report
-        </button>
-      </form>
     </div>
 
     <div class="card-custom comments">
@@ -167,26 +151,18 @@
   </div>
 </div>
 
-<!-- MODAL FOR IMAGE & DOCUMENT -->
 <div class="modal fade" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
-      <div class="modal-body" id="modalBodyContent" style="text-align:center;">
-        <!-- Filled by JS -->
-      </div>
+      <div class="modal-body" id="modalBodyContent" style="text-align:center;"></div>
     </div>
   </div>
 </div>
 
-<!-- BOOTSTRAP ICONS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
-<!-- BOOTSTRAP JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- MODAL SCRIPT -->
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
     const modalBody = document.getElementById("modalBodyContent");
     const mediaItems = document.querySelectorAll("[data-bs-toggle='modal'][data-bs-target='#mediaModal']");
 
@@ -218,7 +194,34 @@
         }
       });
     });
+
+    const likeBtn = document.getElementById("likeBtn");
+    const likeCount = document.getElementById("likeCount");
+
+    likeBtn.addEventListener("click", function () {
+      fetch("{% url 'toggle_like_forum' forum_post.slug %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.liked) {
+          likeBtn.classList.remove("btn-outline-danger");
+          likeBtn.classList.add("btn-danger");
+          likeBtn.innerHTML = `💔 Unlike <span id="likeCount">${data.like_count}</span>`;
+        } else {
+          likeBtn.classList.remove("btn-danger");
+          likeBtn.classList.add("btn-outline-danger");
+          likeBtn.innerHTML = `❤️ Like <span id="likeCount">${data.like_count}</span>`;
+        }
+      })
+      .catch(err => {
+        console.error("Like toggle failed:", err);
+      });
+    });
   });
 </script>
-
 {% endblock %}

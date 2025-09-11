@@ -4,16 +4,21 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from .models import Conversation, Message
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 from .utils import get_or_create_conversation
 from django.db.models import Count, Q
 import json
-from .models import Idea, Comment, Like, Follow, CustomUser, Conversation, ForumPost, ForumPostLike
-from .forms import CustomUserCreationForm, IdeaForm, UserUpdateForm, LoginForm, ContactForm, MessageForm, ForumPostForm, MessageReportForm
+from .models import Idea, Comment, Like, Follow, CustomUser, Conversation, ForumPost, ForumPostLike, ForumPostComment, ForumPostReport
+from .forms import CustomUserCreationForm, IdeaForm, UserUpdateForm, LoginForm, ContactForm, MessageForm, ForumPost, MessageReportForm, ForumPostForm
 
 User = get_user_model()
+
+def generate_slug(title):
+    slug = title.lower().strip()
+    slug = ''.join(c if c.isalnum() or c == ' ' else '' for c in slug)  # Remove special characters
+    slug = '-'.join(slug.split())  # Replace spaces with hyphens
+    return slug
 
 def signup_view(request):
     next_url = request.GET.get("next") or request.POST.get("next")
@@ -194,7 +199,7 @@ def contact_view(request):
 
     return render(request, 'contact.html', {'form': form})
 
-@login_required(login_url='/login/')
+login_required(login_url='/login/')
 def dashboard_view(request):
     user = request.user
 
@@ -222,7 +227,7 @@ def dashboard_view(request):
         for f in followers_qs
     ]
 
-    # --- Conversations / Messages ---
+    # --- Conversations ---
     conversations = (
         Conversation.objects.filter(Q(user1=user) | Q(user2=user))
         .select_related("user1", "user2")
@@ -235,6 +240,10 @@ def dashboard_view(request):
         .distinct()
     )
 
+    # --- Unread Counts ---
+    unread_counts = {convo.id: convo.unread_count for convo in conversations}
+
+    # --- Messages ---
     inbox_messages = (
         Message.objects.filter(folder="inbox", conversation__in=conversations)
         .exclude(sender=user)
@@ -247,27 +256,30 @@ def dashboard_view(request):
         folder="archived", conversation__in=conversations
     ).select_related("sender", "conversation")
 
+    # --- Last Message ---
+    last_message = None
+    if inbox_messages.exists() or sent_messages.exists():
+        all_messages = inbox_messages.union(sent_messages).order_by("timestamp")
+        last_message = all_messages.last()
+
+    # --- Conversation Messages ---
     conversation_messages = {}
     for convo in conversations:
         user_a = convo.user1
         user_b = convo.user2
 
-        # Only include messages where sender and recipient are user and other_user
         messages = Message.objects.filter(
             conversation=convo,
             sender__in=[user_a, user_b]
         ).order_by("timestamp").select_related("sender")
 
-        # Optional: exclude messages not directly between the two
         conversation_messages[convo.id] = [
             msg for msg in messages
             if (msg.sender == user and msg.folder == "sent") or 
                (msg.sender != user and msg.folder == "inbox")
         ]
 
-        unread_counts = {convo.id: convo.unread_count for convo in conversations}
-
-    # Mark unread as read
+    # --- Mark Unread as Read ---
     for convo in conversations:
         convo.messages.filter(is_read=False).exclude(sender=user).update(is_read=True)
 
@@ -352,12 +364,6 @@ def dashboard_view(request):
                 message.save()
                 return redirect("dashboard")
 
-    # --- Last message (fix for template) ---
-    last_message = None
-    if inbox_messages.exists() or sent_messages.exists():
-        all_messages = inbox_messages.union(sent_messages).order_by("timestamp")
-        last_message = all_messages.last()
-
     # --- Context ---
     context = {
         "ideas": ideas,
@@ -378,11 +384,10 @@ def dashboard_view(request):
         "sent_messages": sent_messages,
         "archived_messages": archived_messages,
         "stats": stats,
-        "last_message": last_message,  # ✅ added
+        "last_message": last_message,
     }
 
     return render(request, "dashboard.html", context)
-
 
 @login_required(login_url='/login/')
 @csrf_exempt
@@ -575,7 +580,6 @@ def toggle_star(request, slug):
         idea.starred_by.add(request.user)
     return redirect("idea-detail", slug=slug)
 
-
 @login_required(login_url='/login/')
 def idea_create(request):
     if request.method == "POST":
@@ -748,9 +752,29 @@ def forum_post_detail(request, slug):
     forum_post = get_object_or_404(ForumPost, slug=slug)
     user_liked = ForumPostLike.objects.filter(forum_post=forum_post, user=request.user).exists()
     like_count = forum_post.forum_post_likes.count()
-    return render(request, 'forums/forum_details.html', {
-        'forum_post': forum_post,
-        'user_liked': user_liked,
-        'like_count': like_count,
-    })
+    comments = forum_post.comments.select_related('user').order_by('-created_at')
 
+    if request.method == "POST":
+        if "comment_text" in request.POST:
+            text = request.POST.get("comment_text", "").strip()
+            if text:
+                ForumPostComment.objects.create(
+                    forum_post=forum_post,
+                    user=request.user,
+                    text=text
+                )
+                return redirect("forum_post_detail", slug=slug)
+
+        elif "report_toggle" in request.POST:
+            ForumPostReport.objects.get_or_create(
+                forum_post=forum_post,
+                reported_by=request.user
+            )
+            return redirect("forum_post_detail", slug=slug)
+
+    return render(request, "forums/forum_details.html", {
+        "forum_post": forum_post,
+        "user_liked": user_liked,
+        "like_count": like_count,
+        "comments": comments
+    })

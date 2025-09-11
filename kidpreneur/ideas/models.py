@@ -174,8 +174,10 @@ class Conversation(models.Model):
     def __str__(self):
         return f"{self.subject} ({self.user1.username} & {self.user2.username})"
 
-
 class Message(models.Model):
+    class Meta:
+        db_table = "ideas_message"
+
     FOLDER_CHOICES = [
         ("inbox", "Inbox")
     ]
@@ -216,7 +218,6 @@ class Message(models.Model):
             subject_override=subject or f"Re: {self.subject_override or self.conversation.subject}",
             folder="sent"
         )
-
 
 class MessageReport(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reports") 
@@ -293,7 +294,6 @@ class ForumPostLike(models.Model):
     def __str__(self):
         return f"{self.user.username} liked {self.forum_post.title}"
 
-
 class ForumPostComment(models.Model):
     forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -307,7 +307,6 @@ class ForumPostComment(models.Model):
     @property
     def total_likes(self):
         return self.comment_likes.count()
-
 
 class ForumPostReport(models.Model):
     forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="reports")

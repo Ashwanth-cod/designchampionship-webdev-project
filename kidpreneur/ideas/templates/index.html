@@ -19,80 +19,55 @@
     --theme-end: #90caf9;
   }
 
-  /* ---- Animation Overlay Styles ---- */
   #animationOverlay {
     position: fixed;
     inset: 0;
     background: white;
-    z-index: 1050; /* Above everything */
+    z-index: 1050;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     pointer-events: none;
     overflow: hidden;
+    color: inherit;
   }
 
-  /* Rockets */
-  .rocket {
-    position: absolute;
-    width: 60px;
-    opacity: 0;
-    transition: all 0.8s ease-out;
-  }
-
-  .rocket-top   { top: -100px; left: 50%; transform: translateX(-50%); }
-  .rocket-left  { left: -100px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
-  .rocket-right { right: -100px; top: 50%; transform: translateY(-50%) rotate(90deg); }
-
-  /* Rockets moving to center */
-  #animationOverlay.hero-animate .rocket-top   { top: 35%; opacity: 1; transform: translate(-50%, 0); }
-  #animationOverlay.hero-animate .rocket-left  { left: 35%; opacity: 1; transform: translateY(-50%) rotate(-90deg); }
-  #animationOverlay.hero-animate .rocket-right { right: 35%; opacity: 1; transform: translateY(-50%) rotate(90deg); }
-
-  /* Texts with typewriter effect */
   .hero-text {
     font-family: "Bungee Outline", sans-serif;
-    font-weight: 400;
-    font-style: normal;
-    opacity: 0;
     font-weight: 800;
     font-size: 3.5rem;
-    position: relative;
     margin-top: 3rem;
-    color: #2196f3;
     user-select: none;
     white-space: nowrap;
-    border-right: 0.15em solid #2196f3; /* caret */
+    border-right: 0.15em solid currentColor;
     overflow: hidden;
     max-width: 0;
+    opacity: 0;
     transition: opacity 10ms ease-in;
+    color: currentColor;
   }
 
-  /* Reveal on animate */
   #animationOverlay.hero-animate .hero-text {
     opacity: 1;
   }
 
-  /* Blinking caret animation */
   @keyframes blink-caret {
     0%, 100% { border-color: transparent; }
-    50% { border-color: #2196f3; }
+    50% { border-color: currentColor; }
   }
 
   .hero-text.typing {
     animation: blink-caret 100ms step-end infinite;
-    border-right: 0.15em solid #2196f3;
+    border-right: 0.15em solid currentColor;
   }
 
-  /* Fade out the entire overlay */
   #animationOverlay.fade-out {
     opacity: 0;
     pointer-events: none;
     transition: opacity 100ms ease;
   }
 
-  /* -------- Normal Hero Section styles -------- */
   .hero-gradient {
     border-radius: var(--radius);
     padding: 3rem 1.5rem;
@@ -104,13 +79,11 @@
     margin-bottom: 3rem;
   }
 
-  /* Carousel spacing */
   .carousel-wrapper {
-    margin-top: 0; /* Remove if it's pushing too far */
+    margin-top: 0;
     padding-top: 2rem;
   }
 
-  /* Theme colors (optional) */
   .theme-red   .hero-gradient { --theme-start: #ff1744; --theme-end: #ff8a80; color: black; }
   .theme-yellow .hero-gradient { --theme-start: #ffc107; --theme-end: #fff176; color: black; }
   .theme-blue  .hero-gradient { --theme-start: #2196f3; --theme-end: #90caf9; color: black; }
@@ -119,27 +92,20 @@
   .theme-purple .hero-gradient { --theme-start: #9c27b0; --theme-end: #ce93d8; color: black; }
   .theme-orange .hero-gradient { --theme-start: #ff7043; --theme-end: #ffab91; color: black; }
 
-  /* Button spacing */
   .hero-gradient .btn {
     margin-top: 1rem;
   }
-
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Animation Overlay -->
-<div id="animationOverlay" aria-hidden="true" role="presentation" aria-label="Intro animation">
-  
-  <div class="hero-text think" aria-hidden="true" data-text="Think."></div>     <!-- Left rocket -->
-  <div class="hero-text create" aria-hidden="true" data-text="Create."></div>   <!-- Top rocket -->
-  <div class="hero-text launch" aria-hidden="true" data-text="Launch!"></div>  <!-- Right rocket -->
+<div id="animationOverlay" aria-hidden="true" role="presentation">
+  <div class="hero-text think" aria-hidden="true" data-text="Think."></div>
+  <div class="hero-text create" aria-hidden="true" data-text="Create."></div>
+  <div class="hero-text launch" aria-hidden="true" data-text="Launch!"></div>
 </div>
 
-<!-- Normal Dashboard Content -->
 <div class="dashboard-container" style="visibility: hidden;" id="dashboardContent">
-
-  <!-- Hero Section -->
   <section class="hero-gradient">
     <img src="{% static 'images/rocket.png' %}" alt="Rocket" width="80" class="mb-3" loading="lazy">
     <h1 class="fw-bold display-5">Think. Create. Launch! 🚀</h1>
@@ -152,14 +118,11 @@
 
   <br><br><br>
 
-  <!-- Carousel Section -->
   <section class="carousel-wrapper text-center">
     <h2 class="fw-bold mb-4">Most Loved Ideas 💡</h2>
 
     {% if top_ideas %}
     <div id="ideasCarousel" class="carousel slide carousel-dark mx-auto" data-bs-ride="carousel" data-bs-interval="5000" style="width: 1100px;">
-
-      <!-- Indicators -->
       <div class="carousel-indicators">
         {% for idea in top_ideas %}
           <button type="button" data-bs-target="#ideasCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
@@ -168,7 +131,6 @@
         {% endfor %}
       </div>
 
-      <!-- Slides -->
       <div class="carousel-inner rounded shadow-sm">
         {% for idea in top_ideas %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
@@ -189,7 +151,6 @@
         {% endfor %}
       </div>
 
-      <!-- Controls -->
       <button class="carousel-control-prev" type="button" data-bs-target="#ideasCarousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Previous</span>
@@ -203,40 +164,43 @@
       <p class="empty">No ideas yet — be the first to share one! 🌟</p>
     {% endif %}
   </section>
-
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-// CSRF Helper function (already in your code)
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
-}
-
-// Dashboard Theme Loader + Typewriter Animation
 document.addEventListener("DOMContentLoaded", () => {
   const savedTheme = localStorage.getItem("dashboardTheme");
   const container = document.querySelector(".dashboard-container");
+  const overlay = document.getElementById("animationOverlay");
 
   if (savedTheme && container) {
     container.classList.add(`theme-${savedTheme}`);
+
+    // Map theme -> overlay text color
+    const themeColors = {
+      red: "#ff1744",
+      yellow: "#ffc107",
+      blue: "#2196f3",
+      green: "#00c853",
+      pink: "#e91e63",
+      purple: "#9c27b0",
+      orange: "#ff7043",
+    };
+
+    if (themeColors[savedTheme]) {
+      overlay.style.color = themeColors[savedTheme];
+    }
   }
 
-  const overlay = document.getElementById('animationOverlay');
-  const dashboardContent = document.getElementById('dashboardContent');
-
-  // Typing effect for each word sequentially
+  const dashboardContent = document.getElementById("dashboardContent");
   const texts = Array.from(overlay.querySelectorAll(".hero-text"));
-  let currentIndex = 0;
 
   function typeText(element, text, delay = 100) {
     return new Promise((resolve) => {
       element.textContent = "";
       element.style.maxWidth = "0";
-      element.classList.add('typing');
+      element.classList.add("typing");
       let i = 0;
 
       function type() {
@@ -246,60 +210,29 @@ document.addEventListener("DOMContentLoaded", () => {
           i++;
           setTimeout(type, delay);
         } else {
-          element.classList.remove('typing');
+          element.classList.remove("typing");
           resolve();
         }
       }
-
       type();
     });
   }
 
   async function playAnimation() {
-    overlay.style.pointerEvents = "none"; // prevent interactions
-
+    overlay.style.pointerEvents = "none";
     for (const el of texts) {
       const text = el.dataset.text;
       await typeText(el, text, 120);
-      await new Promise(r => setTimeout(r, 600)); // pause between words
+      await new Promise((r) => setTimeout(r, 600));
     }
-
-    // Fade out overlay and show dashboard after animation
-    overlay.classList.add('fade-out');
-    dashboardContent.style.visibility = 'visible';
+    overlay.classList.add("fade-out");
+    dashboardContent.style.visibility = "visible";
   }
 
-  // Start the animation after a short delay
   setTimeout(() => {
-    overlay.classList.add('hero-animate');
+    overlay.classList.add("hero-animate");
     playAnimation();
   }, 100);
-
-  // Like/star button logic (if any star buttons exist)
-  document.querySelectorAll(".star-btn").forEach(button => {
-    button.addEventListener("click", async () => {
-      const slug = button.dataset.slug;
-
-      try {
-        const res = await fetch(`/ideas/${slug}/like/`, {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
-            "X-Requested-With": "XMLHttpRequest"
-          }
-        });
-
-        if (!res.ok) throw new Error("Request failed");
-        const data = await res.json();
-
-        button.classList.toggle("starred", data.liked);
-        button.innerText = data.liked ? "★ Starred" : "☆ Star";
-        button.setAttribute("aria-pressed", data.liked.toString());
-      } catch (err) {
-        console.error("Like error:", err);
-      }
-    });
-  });
 });
 </script>
 {% endblock %}
